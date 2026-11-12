@@ -1,0 +1,1724 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Secador de Torre 60 T/H</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Adicionar biblioteca de leitura de Excel -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --brand-navy: #142b40;
+            --brand-green: #6f923d;
+            --brand-gold: #c9a348;
+            --ink: #1d2c3b;
+            --muted: #647587;
+        }
+        body { font-family: 'Inter', sans-serif; background: #f3f6f8; color: var(--ink); }
+        nav { background: linear-gradient(110deg, #10243a, #1d3c50) !important; border-bottom: 3px solid var(--brand-green); }
+        main { background: linear-gradient(180deg, #f7f9fb 0, #eff3f6 100%); }
+        .dashboard-intro { display: flex; align-items: flex-end; justify-content: space-between; gap: 1.5rem; }
+        .dashboard-eyebrow { color: var(--brand-green); font-size: .68rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+        .dashboard-title { color: var(--brand-navy); font-size: clamp(1.65rem, 3vw, 2.15rem); font-weight: 700; letter-spacing: -.04em; line-height: 1.15; margin-top: .35rem; }
+        .dashboard-subtitle { color: var(--muted); font-size: .9rem; margin-top: .45rem; }
+        .report-date { background: white; border: 1px solid #dfe6eb; border-radius: .75rem; box-shadow: 0 4px 14px rgba(20, 43, 64, .04); color: var(--muted); font-size: .75rem; padding: .7rem 1rem; white-space: nowrap; }
+        .report-date strong { color: var(--ink); font-weight: 700; }
+        .executive-hero { align-items: center; background: radial-gradient(circle at 88% 12%, rgba(201, 163, 72, .24), transparent 25%), linear-gradient(115deg, #142b40, #24485b); border: 1px solid rgba(255,255,255,.12); border-radius: 1.15rem; box-shadow: 0 18px 38px rgba(20, 43, 64, .14); color: white; display: flex; gap: 2rem; justify-content: space-between; overflow: hidden; padding: clamp(1.25rem, 3vw, 2rem); position: relative; }
+        .executive-hero::after { background: linear-gradient(140deg, transparent, rgba(255,255,255,.045)); content: ""; inset: 0; pointer-events: none; position: absolute; }
+        .hero-copy { flex: 1; min-width: 0; position: relative; z-index: 1; }
+        .hero-kicker { color: #c2d59d; font-size: .68rem; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; }
+        .hero-title { color: white; font-size: 1.1rem; font-weight: 600; margin: .45rem 0 1.2rem; }
+        .hero-progress-track { background: rgba(255,255,255,.16); border-radius: 9999px; box-shadow: inset 0 1px 3px rgba(0,0,0,.12); height: .7rem; overflow: hidden; }
+        .hero-progress-fill { background: linear-gradient(90deg, #8eaf54, #c0cb7b); box-shadow: 0 0 16px rgba(192,203,123,.28); height: 100%; }
+        .hero-footnote { color: #c4d0d9; display: flex; font-size: .7rem; justify-content: space-between; margin-top: .65rem; }
+        .hero-metric { border-left: 1px solid rgba(255,255,255,.2); min-width: 180px; padding-left: 2rem; position: relative; text-align: right; z-index: 1; }
+        .hero-metric-label { color: #c4d0d9; font-size: .68rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+        .hero-metric-value { color: white; font-size: clamp(3.4rem, 6vw, 5rem); font-weight: 700; letter-spacing: -.07em; line-height: 1; margin: .4rem 0; }
+        .hero-metric-caption { color: #c4d0d9; font-size: .75rem; }
+        .section-heading { align-items: end; display: flex; justify-content: space-between; margin-bottom: 1rem; }
+        .section-heading h2 { color: var(--brand-navy); font-size: 1.12rem; font-weight: 700; letter-spacing: -.02em; }
+        .section-heading p { color: var(--muted); font-size: .78rem; margin-top: .25rem; }
+        .executive-kpi-card { background: white; border: 1px solid #e1e8ed; border-radius: .9rem; box-shadow: 0 5px 16px rgba(20,43,64,.045); min-height: 116px; padding: 1.1rem 1.2rem; position: relative; transition: transform .18s ease, box-shadow .18s ease; }
+        .executive-kpi-card:hover { box-shadow: 0 10px 24px rgba(20,43,64,.09); transform: translateY(-2px); }
+        .executive-kpi-label { color: var(--muted); font-size: .68rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+        .executive-kpi-value { color: var(--brand-navy); font-size: 2rem; font-weight: 700; letter-spacing: -.05em; line-height: 1; margin-top: .65rem; }
+        .executive-kpi-hint { color: #8a98a5; font-size: .68rem; margin-top: .4rem; }
+        .kpi-icon { align-items: center; background: #eef3e8; border-radius: .7rem; color: var(--brand-green); display: flex; height: 2.2rem; justify-content: center; position: absolute; right: 1rem; top: 1rem; width: 2.2rem; }
+        #deviation-container { border-radius: .9rem; min-height: 116px; }
+        #deviation-container.deviation-positive { background: #f0f7e8; border-color: #d6e5c4; }
+        #deviation-container.deviation-negative { background: #fff1f1; border-color: #f1d0d0; }
+        #deviation-container #deviation-value-text { margin-top: .65rem; }
+        #deviation-value-text.deviation-positive { color: #52742d; }
+        #deviation-value-text.deviation-negative { color: #c23e3e; }
+        #areas-progress-container > div { border-color: #e1e8ed; border-radius: .9rem; box-shadow: 0 5px 16px rgba(20,43,64,.045); transition: transform .18s ease, box-shadow .18s ease; }
+        #areas-progress-container > div:hover { box-shadow: 0 10px 24px rgba(20,43,64,.09); transform: translateY(-2px); }
+        #areas-progress-container h3 { color: var(--brand-navy); }
+        #areas-progress-container .bg-blue-600 { background-color: var(--brand-green); }
+        .filter-card { border-color: #e1e8ed; border-left-width: 4px; border-radius: .85rem; box-shadow: 0 4px 14px rgba(20,43,64,.04); transition: transform .18s ease, box-shadow .18s ease, opacity .18s ease; }
+        .filter-card:hover { box-shadow: 0 9px 22px rgba(20,43,64,.09); transform: translateY(-2px); }
+        .surface-card { border-color: #e1e8ed !important; border-radius: 1rem !important; box-shadow: 0 7px 22px rgba(20,43,64,.05) !important; }
+        .section-toolbar { background: #f8fafb !important; }
+        .tab-button { color: #687a8b; }
+        .tab-button.is-active { color: var(--brand-green); border-color: var(--brand-green); }
+        #task-container .group-section { transition: background-color .18s ease; }
+        #task-container .group-section:hover { background-color: #fbfcfd; }
+        #task-container .group-section > .group h3 { color: var(--brand-navy); }
+        #task-container .group-section input[type="range"] { accent-color: var(--brand-green); }
+        .progress-bar-transition { transition: width 0.5s ease-in-out; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .accordion-content { transition: max-height 0.5s ease-in-out, opacity 0.5s ease-in-out; max-height: 0; opacity: 0; overflow: hidden; }
+        .accordion-content.open { max-height: 8000px; opacity: 1; }
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        /* Lógica de Impressão (Mural) */
+        body.printing-mode { overflow: visible !important; height: auto !important; background-color: white !important; display: block !important; }
+        body.printing-mode > *:not(#print-area):not(script) { display: none !important; }
+        body.printing-mode #print-area { display: block !important; position: static !important; width: 100% !important; height: auto !important; overflow: visible !important; background: white; }
+
+        @media print {
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; float: none !important; }
+            html, body { height: auto !important; min-height: auto !important; overflow: visible !important; display: block !important; position: static !important; margin: 0 !important; padding: 0 !important; background-color: white !important; }
+            body > *:not(#print-area) { display: none !important; }
+            #print-area { position: static !important; display: block !important; width: 100% !important; height: auto !important; overflow: visible !important; padding: 0 !important; margin: 0 !important; }
+            #print-table-container { overflow: visible !important; height: auto !important; }
+            .no-print { display: none !important; }
+            @page { size: landscape; margin: 10mm; }
+            table { page-break-inside: auto; width: 100% !important; border-collapse: collapse !important; }
+            tr { page-break-inside: avoid; page-break-after: auto; }
+            td, th { page-break-inside: avoid; }
+            thead { display: table-header-group; } 
+            #tempPrintCanvas { max-width: 100% !important; height: auto !important; page-break-inside: avoid; }
+            .print-safe-image { display: block !important; max-width: 100% !important; page-break-inside: avoid !important; }
+        }
+        @media (max-width: 640px) {
+            .dashboard-intro { align-items: flex-start; flex-direction: column; gap: .75rem; }
+            .executive-hero { align-items: flex-start; flex-direction: column-reverse; gap: 1rem; }
+            .hero-metric { border-left: 0; border-top: 1px solid rgba(255,255,255,.2); min-width: 0; padding: 1rem 0 0; text-align: left; width: 100%; }
+            .hero-metric-value { font-size: 3.2rem; }
+            .report-date { padding: .55rem .75rem; }
+        }
+    </style>
+</head>
+<body class="text-slate-800 h-screen flex flex-col overflow-hidden">
+
+    <!-- Navbar -->
+    <nav class="bg-slate-900 text-white shadow-lg z-10 shrink-0">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <div class="bg-white p-1 rounded-lg mr-3 flex items-center justify-center w-24 sm:w-32 h-10 sm:h-12">
+                        <img src="./logo.jpg" alt="Logo do projeto" class="max-w-full max-h-full object-contain">
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-sm md:text-base leading-tight flex flex-wrap items-center gap-2">
+                            PROJETO GLOBAL - SECAGEM POR TORRE
+                            <span id="executive-status" class="hidden text-[10px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider transition-colors shadow-sm"></span>
+                        </h1>
+                        <p class="text-xs text-slate-400 font-medium">CAPACIDADE 60 TON/H - Data ref: 10/11/2026</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <div class="hidden sm:flex items-center bg-orange-500/20 border border-orange-500/30 px-3 py-1.5 rounded-lg text-orange-300" title="Efetivo Total na Obra">
+                        <i class="fa-solid fa-users mr-2"></i>
+                        <span class="text-xs font-medium mr-1">Efetivo:</span>
+                        <span id="total-workers-nav" class="font-bold text-white text-sm">0</span>
+                    </div>
+
+                    <button id="manage-btn" onclick="openScheduleModal()" class="hidden items-center gap-2 bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition shadow-md border border-slate-600" title="Importar/Exportar Cronograma">
+                        <i class="fa-solid fa-file-import"></i>
+                        <span class="hidden lg:inline">Cronograma</span>
+                    </button>
+
+                    <button id="notify-btn" onclick="openNotifyModal()" class="hidden items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-md">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        <span class="hidden md:inline">Salvar e Notificar</span>
+                    </button>
+
+                    <div id="sync-status" class="hidden md:flex items-center gap-2 text-xs text-slate-300" role="status" aria-live="polite">
+                        <span id="sync-status-dot" class="w-2 h-2 rounded-full bg-slate-400"></span>
+                        <span id="sync-status-text">Aguardando autenticação</span>
+                    </div>
+                    <button id="auth-btn" onclick="toggleAuthModal()" class="flex items-center gap-2 bg-slate-800 border border-slate-700 hover:bg-slate-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-md">
+                        <i class="fa-solid fa-lock text-slate-300"></i>
+                        <span class="hidden md:inline">Acesso Restrito</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+        <div class="max-w-7xl mx-auto space-y-6 pb-12">
+
+            <section class="dashboard-intro">
+                <div>
+                    <p class="dashboard-eyebrow">Painel de controle · Projeto Global</p>
+                    <h2 class="dashboard-title">Acompanhamento executivo</h2>
+                    <p class="dashboard-subtitle">Síntese de desempenho da implantação do Secador de Torre 60 T/H.</p>
+                </div>
+                <div class="report-date"><i class="fa-regular fa-calendar mr-2 text-emerald-700"></i>Data-base <strong>10 nov 2026</strong></div>
+            </section>
+
+            <section id="global-progress-panel" class="executive-hero">
+                <div class="hero-copy">
+                    <p class="hero-kicker"><i class="fa-solid fa-chart-pie mr-2"></i>Progresso físico global</p>
+                    <h2 class="hero-title">Avanço consolidado do projeto</h2>
+                    <div class="hero-progress-track">
+                        <div id="global-progress-bar" class="hero-progress-fill progress-bar-transition" style="width: 0%"></div>
+                    </div>
+                    <div class="hero-footnote"><span>Execução total ponderada</span><span>Meta: 100%</span></div>
+                </div>
+                <div class="hero-metric">
+                    <p class="hero-metric-label">Realizado</p>
+                    <p class="hero-metric-value" id="global-percent">0%</p>
+                    <p class="hero-metric-caption">do escopo total da obra</p>
+                </div>
+            </section>
+
+            <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4" aria-label="Indicadores executivos">
+                <div onclick="openDetailsModal('planned')" class="executive-kpi-card cursor-pointer">
+                    <span class="kpi-icon"><i class="fa-regular fa-calendar-check"></i></span>
+                    <p class="executive-kpi-label">Avanço previsto</p>
+                    <p class="executive-kpi-value" id="planned-progress">20%</p>
+                    <p class="executive-kpi-hint">Planejamento na data-base</p>
+                </div>
+                <div onclick="openDetailsModal('actual')" class="executive-kpi-card cursor-pointer">
+                    <span class="kpi-icon"><i class="fa-solid fa-chart-line"></i></span>
+                    <p class="executive-kpi-label">Avanço realizado</p>
+                    <p class="executive-kpi-value" id="actual-progress-kpi">0%</p>
+                    <p class="executive-kpi-hint">Execução física registrada</p>
+                </div>
+                <div onclick="openDetailsModal('deviation')" class="executive-kpi-card cursor-pointer" id="deviation-container" title="Ver atividades atrasadas">
+                    <span class="kpi-icon"><i class="fa-solid fa-scale-balanced"></i></span>
+                    <p class="executive-kpi-label" id="deviation-label">Desvio atual</p>
+                    <p class="executive-kpi-value" id="deviation-value-text"><i class="fa-solid fa-arrow-trend-down" id="deviation-icon"></i><span id="deviation-value">0%</span></p>
+                    <p class="executive-kpi-hint">Realizado menos previsto</p>
+                </div>
+                <div class="executive-kpi-card">
+                    <span class="kpi-icon"><i class="fa-solid fa-people-group"></i></span>
+                    <p class="executive-kpi-label">Efetivo na obra</p>
+                    <p class="executive-kpi-value" id="total-workers">0</p>
+                    <p class="executive-kpi-hint">Profissionais informados</p>
+                </div>
+            </section>
+
+            <!-- Avanço por Área Dinâmico -->
+            <section class="mt-2 mb-6">
+                <div class="section-heading">
+                    <div><h2>Desempenho por frente de serviço</h2><p>Comparativo entre avanço realizado e previsto por disciplina.</p></div>
+                </div>
+                <div id="areas-progress-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+                    <!-- Gerado via JS automaticamente para evitar áreas zeradas -->
+                </div>
+            </section>
+
+            <!-- Resumo por Disciplina (Filtros) -->
+            <section>
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-3 gap-3">
+                    <div><h2 class="text-sm font-bold text-slate-700 uppercase tracking-wider"><i class="fa-solid fa-filter mr-2 text-emerald-700"></i>Explorar atividades por disciplina</h2><p class="text-xs text-slate-500 mt-1">Selecione uma frente para detalhar o cronograma.</p></div>
+                    <div class="flex gap-2">
+                        <button onclick="copyShareLink()" class="flex items-center gap-2 bg-white hover:bg-slate-50 text-emerald-800 px-4 py-2 rounded-lg text-xs font-bold transition shadow-sm border border-emerald-200">
+                            <i class="fa-solid fa-link"></i> Copiar Link Atualizado
+                        </button>
+                        <button onclick="openMuralModal()" class="flex items-center gap-2 bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-lg text-xs font-bold transition shadow-sm border border-slate-700">
+                            <i class="fa-solid fa-print"></i> Mural de Montagem
+                        </button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                    <div id="card-Civil" onclick="toggleFilter('Civil')" class="filter-card bg-white rounded-xl shadow-sm p-4 border border-l-4 border-l-emerald-500 cursor-pointer hover:shadow-md hover:bg-emerald-50 transition-all ring-emerald-500">
+                        <div class="flex justify-between items-center mb-2"><h3 class="font-semibold text-slate-700 text-sm"><i class="fa-solid fa-trowel-bricks mr-2 text-emerald-500"></i>Civil</h3><span class="text-emerald-600 font-bold" id="civil-percent">0%</span></div>
+                        <div class="w-full bg-slate-100 rounded-full h-2"><div id="civil-progress-bar" class="bg-emerald-500 h-2 rounded-full progress-bar-transition" style="width: 0%"></div></div>
+                    </div>
+                    <div id="card-Mecânica" onclick="toggleFilter('Mecânica')" class="filter-card bg-white rounded-xl shadow-sm p-4 border border-l-4 border-l-blue-500 cursor-pointer hover:shadow-md hover:bg-blue-50 transition-all ring-blue-500">
+                        <div class="flex justify-between items-center mb-2"><h3 class="font-semibold text-slate-700 text-sm"><i class="fa-solid fa-wrench mr-2 text-blue-500"></i>Mecânica</h3><span class="text-blue-600 font-bold" id="mec-percent">0%</span></div>
+                        <div class="w-full bg-slate-100 rounded-full h-2"><div id="mec-progress-bar" class="bg-blue-500 h-2 rounded-full progress-bar-transition" style="width: 0%"></div></div>
+                    </div>
+                    <div id="card-Elétrica" onclick="toggleFilter('Elétrica')" class="filter-card bg-white rounded-xl shadow-sm p-4 border border-l-4 border-l-yellow-400 cursor-pointer hover:shadow-md hover:bg-yellow-50 transition-all ring-yellow-400">
+                        <div class="flex justify-between items-center mb-2"><h3 class="font-semibold text-slate-700 text-sm"><i class="fa-solid fa-bolt mr-2 text-yellow-500"></i>Elétrica</h3><span class="text-yellow-600 font-bold" id="ele-percent">0%</span></div>
+                        <div class="w-full bg-slate-100 rounded-full h-2"><div id="ele-progress-bar" class="bg-yellow-400 h-2 rounded-full progress-bar-transition" style="width: 0%"></div></div>
+                    </div>
+                    <div id="card-Automação" onclick="toggleFilter('Automação')" class="filter-card bg-white rounded-xl shadow-sm p-4 border border-l-4 border-l-purple-500 cursor-pointer hover:shadow-md hover:bg-purple-50 transition-all ring-purple-500">
+                        <div class="flex justify-between items-center mb-2"><h3 class="font-semibold text-slate-700 text-sm"><i class="fa-solid fa-microchip mr-2 text-purple-500"></i>Automação</h3><span class="text-purple-600 font-bold" id="aut-percent">0%</span></div>
+                        <div class="w-full bg-slate-100 rounded-full h-2"><div id="aut-progress-bar" class="bg-purple-500 h-2 rounded-full progress-bar-transition" style="width: 0%"></div></div>
+                    </div>
+                    <div id="card-Pneumática" onclick="toggleFilter('Pneumática')" class="filter-card bg-white rounded-xl shadow-sm p-4 border border-l-4 border-l-cyan-500 cursor-pointer hover:shadow-md hover:bg-cyan-50 transition-all ring-cyan-500">
+                        <div class="flex justify-between items-center mb-2"><h3 class="font-semibold text-slate-700 text-sm"><i class="fa-solid fa-wind mr-2 text-cyan-500"></i>Pneumática</h3><span class="text-cyan-600 font-bold" id="pneu-percent">0%</span></div>
+                        <div class="w-full bg-slate-100 rounded-full h-2"><div id="pneu-progress-bar" class="bg-cyan-500 h-2 rounded-full progress-bar-transition" style="width: 0%"></div></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Curva S e Alertas -->
+            <div class="grid grid-cols-1 gap-6">
+                <!-- Abas: Radar, Logística, Fluxo, Data -->
+                <div class="surface-card bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col h-[340px] overflow-hidden">
+                    <div class="section-toolbar bg-slate-50 border-b border-slate-200 flex shrink-0">
+                        <button onclick="switchTab('radar')" id="tab-btn-radar" class="flex-1 py-3 text-[10px] sm:text-xs font-bold text-indigo-600 border-b-2 border-indigo-600 uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5">
+                            <i class="fa-regular fa-calendar-check hidden sm:inline"></i> Execução <span id="badge-tab-radar" class="hidden bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded-full text-[9px]"></span>
+                        </button>
+                        <button onclick="switchTab('logistics')" id="tab-btn-logistics" class="flex-1 py-3 text-[10px] sm:text-xs font-bold text-slate-500 border-b-2 border-transparent hover:text-slate-700 uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-truck-fast hidden sm:inline"></i> Logística <span id="badge-tab-logistics" class="hidden bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded-full text-[9px]"></span>
+                        </button>
+                        <button onclick="switchTab('deps')" id="tab-btn-deps" class="flex-1 py-3 text-[10px] sm:text-xs font-bold text-slate-500 border-b-2 border-transparent hover:text-slate-700 uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-list-ol hidden sm:inline"></i> Fluxo
+                        </button>
+                        <button onclick="switchTab('dateFilter')" id="tab-btn-dateFilter" class="flex-1 py-3 text-[10px] sm:text-xs font-bold text-slate-500 border-b-2 border-transparent hover:text-slate-700 uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-filter hidden sm:inline"></i> Por Data
+                        </button>
+                    </div>
+                    <div class="p-3 overflow-y-auto flex-1 relative bg-slate-50/50">
+                        <div id="tab-content-radar" class="block space-y-2"></div>
+                        <div id="tab-content-logistics" class="hidden space-y-2"></div>
+                        <div id="tab-content-deps" class="hidden space-y-2"></div>
+                        <div id="tab-content-dateFilter" class="hidden flex-col h-full">
+                            <div class="flex items-end gap-2 bg-white p-3 rounded-lg border border-slate-200 shadow-sm shrink-0 mb-3">
+                                <div class="flex-1"><label class="block text-[9px] font-bold text-slate-500 uppercase mb-1">Início</label><input type="date" id="filter-start-date" class="w-full text-xs p-1.5 border border-slate-300 rounded focus:outline-none focus:border-indigo-500"></div>
+                                <div class="flex-1"><label class="block text-[9px] font-bold text-slate-500 uppercase mb-1">Fim</label><input type="date" id="filter-end-date" class="w-full text-xs p-1.5 border border-slate-300 rounded focus:outline-none focus:border-indigo-500"></div>
+                                <button onclick="applyDateFilter()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded text-xs font-bold transition-colors">Filtrar</button>
+                            </div>
+                            <div id="date-filter-results" class="flex-1 overflow-y-auto space-y-2 pr-1 pb-2">
+                                <div class="text-center py-6 text-slate-400 text-xs font-medium"><i class="fa-solid fa-calendar-day block text-3xl mb-3 opacity-50"></i>Selecione as datas acima<br>para filtrar o cronograma.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráfico Curva S -->
+                <div class="surface-card bg-white rounded-xl shadow-sm p-5 border border-slate-200 flex flex-col w-full">
+                    <h2 class="text-lg font-bold text-slate-800 mb-4"><i class="fa-solid fa-chart-line mr-2 text-emerald-700"></i>Curva S da obra</h2>
+                    <div class="relative w-full h-[320px]">
+                        <canvas id="sCurveChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lista de Tarefas (Timeline) -->
+            <div class="surface-card bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="section-toolbar px-5 py-4 border-b border-slate-200 bg-slate-50 flex flex-col sm:flex-row justify-between sm:items-center gap-3">
+                    <h2 class="text-lg font-bold text-slate-800"><i class="fa-solid fa-route mr-2 text-slate-500"></i>Ordem das Atividades</h2>
+                    <div class="flex items-center gap-3 text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider">
+                        <span class="flex items-center gap-1"><div class="w-2.5 h-2.5 rounded-full bg-slate-200 border border-slate-300"></div> Não Iniciado</span>
+                        <span class="flex items-center gap-1"><div class="w-2.5 h-2.5 rounded-full bg-blue-500 border border-blue-600"></div> Em Andamento</span>
+                        <span class="flex items-center gap-1"><div class="w-2.5 h-2.5 rounded-full bg-emerald-500 border border-emerald-600"></div> Concluído</span>
+                    </div>
+                    <span id="edit-badge" class="hidden bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1 rounded-md border border-emerald-200 self-start sm:self-auto"><i class="fa-solid fa-pen mr-1"></i> MODO EDIÇÃO ATIVO</span>
+                </div>
+                <div id="task-container" class="divide-y divide-slate-100 bg-slate-50/30">
+                    <!-- Gerado via JS -->
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Modais -->
+    <div id="modal-bg" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden z-40 fade-in transition-opacity"></div>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl shadow-2xl p-6 w-full max-w-sm hidden z-50 fade-in border border-slate-200">
+        <div class="flex justify-between items-start mb-4"><h3 class="text-lg font-bold text-slate-900"><i class="fa-solid fa-shield-halved text-blue-600 mr-2"></i> Acesso da equipe</h3><button onclick="closeAuthModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button></div>
+        <p class="text-sm text-slate-600 mb-4">Entre com a conta autorizada para visualizar as atualizações e editar o cronograma.</p>
+        <div class="mb-3"><label for="auth-email" class="block text-xs font-semibold text-slate-700 mb-1">E-mail</label><input type="email" id="auth-email" autocomplete="username" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="voce@empresa.com.br"></div>
+        <div class="mb-4"><label for="auth-password" class="block text-xs font-semibold text-slate-700 mb-1">Senha</label><input type="password" id="auth-password" autocomplete="current-password" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Sua senha" onkeypress="if(event.key === 'Enter') handleLogin()"><p id="login-error-msg" class="text-rose-500 text-xs font-bold mt-1 hidden" role="alert"></p></div>
+        <button onclick="handleLogin()" class="w-full bg-blue-600 text-white font-semibold rounded-lg px-4 py-2 hover:bg-blue-700 transition-colors">Entrar e sincronizar</button>
+    </div>
+
+    <!-- Notify/Email Modal -->
+    <div id="notify-modal" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl shadow-2xl p-6 w-full max-w-md hidden z-50 fade-in border border-slate-200">
+        <div class="flex justify-between items-start mb-4">
+            <h3 class="text-lg font-bold text-slate-900"><i class="fa-solid fa-envelope-open-text text-indigo-600 mr-2"></i> Notificar Atualização</h3>
+            <button onclick="closeNotifyModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+        </div>
+        <p class="text-sm text-slate-600 mb-4">Envie o status atualizado da obra e o link de acesso aos envolvidos.</p>
+        <div class="mb-4"><label class="block text-xs font-semibold text-slate-700 mb-1">E-mails dos Destinatários (separados por vírgula)</label><input type="text" id="notify-emails" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="diretoria@empresa.com, engenheiro@empresa.com"></div>
+        <div class="mb-4 bg-slate-50 p-3 rounded-lg border border-slate-200"><p class="text-xs font-bold text-slate-500 uppercase mb-2">Prévia do Resumo:</p><p id="notify-preview" class="text-xs text-slate-700 font-mono whitespace-pre-line overflow-y-auto max-h-32"></p></div>
+        <button onclick="sendNotification()" class="w-full bg-indigo-600 text-white font-semibold rounded-lg px-4 py-2 hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2"><i class="fa-solid fa-paper-plane"></i> Enviar Relatório</button>
+    </div>
+
+    <!-- Gerenciar Cronograma Modal -->
+    <div id="schedule-modal" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl shadow-2xl p-6 w-full max-w-md hidden z-50 fade-in border border-slate-200">
+        <div class="flex justify-between items-start mb-4"><h3 class="text-lg font-bold text-slate-900"><i class="fa-solid fa-file-invoice text-indigo-600 mr-2"></i> Gerenciar Cronograma</h3><button onclick="closeScheduleModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button></div>
+        <p class="text-sm text-slate-600 mb-4">Você pode exportar a lista atual, ou importar um novo arquivo <b>(.json, .pdf, .mpp, .xlsx)</b> se houverem mudanças no projeto.</p>
+        <div class="flex flex-col gap-3">
+            <button onclick="exportSchedule()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold rounded-lg px-4 py-3 transition-colors flex items-center justify-center gap-2 border border-slate-300"><i class="fa-solid fa-download text-indigo-600"></i> Baixar Cronograma Atual (.json)</button>
+            <div class="relative w-full">
+                <input type="file" id="import-file" accept=".json, .pdf, .mpp, .mpx, .xml, .csv, .xlsx" class="hidden" onchange="importSchedule(event)">
+                <button onclick="document.getElementById('import-file').click()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg px-4 py-3 transition-colors flex items-center justify-center gap-2 shadow-sm"><i class="fa-solid fa-upload"></i> Importar Novo Cronograma</button>
+            </div>
+            <p class="text-[10px] text-slate-400 text-center mt-1">O sistema lerá automaticamente o documento selecionado.</p>
+        </div>
+    </div>
+
+    <!-- Modal de Fotos -->
+    <div id="photo-modal" class="fixed inset-0 bg-slate-900/75 backdrop-blur-sm hidden flex items-center justify-center z-50 transition-opacity fade-in">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 md:p-8 max-w-4xl w-full mx-4 flex flex-col max-h-[90vh]">
+            <div class="flex items-center justify-between mb-4">
+                <div><h3 class="text-xl font-bold text-slate-900" id="photo-modal-title">Imagens</h3><p class="text-sm text-slate-500 mt-1">Galeria de acompanhamento visual</p></div>
+                <button onclick="closePhotoModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-2xl"></i></button>
+            </div>
+            <div class="flex-1 overflow-y-auto mb-4 p-4 bg-slate-50 rounded-xl border border-slate-200 min-h-[300px]"><div id="photo-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4"></div></div>
+            <div class="pt-4 border-t border-slate-200 flex justify-end gap-3">
+                <input type="file" id="photo-upload" accept="image/*" class="hidden" onchange="handlePhotoUpload(event)">
+                <button onclick="document.getElementById('photo-upload').click()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-5 rounded-lg transition flex items-center gap-2 shadow-sm"><i class="fa-solid fa-camera"></i> Adicionar Imagem</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Detalhes dos KPIs -->
+    <div id="details-modal" class="fixed inset-0 bg-slate-900/75 backdrop-blur-sm hidden flex items-center justify-center z-50 transition-opacity fade-in">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 md:p-8 max-w-2xl w-full mx-4 flex flex-col max-h-[90vh]">
+            <div class="flex items-center justify-between mb-4 pb-4 border-b border-slate-100"><h3 class="text-xl font-bold text-slate-900 flex items-center gap-3" id="details-modal-title"></h3><button onclick="closeDetailsModal()" class="text-slate-400 hover:text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-full w-8 h-8 flex items-center justify-center transition-colors"><i class="fa-solid fa-xmark"></i></button></div>
+            <div class="flex-1 overflow-y-auto mb-2 pr-2"><div id="details-list" class="divide-y divide-slate-100"></div></div>
+        </div>
+    </div>
+
+    <!-- Modal Configuração Mural -->
+    <div id="mural-modal" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl shadow-2xl p-6 w-full max-w-sm hidden z-50 fade-in border border-slate-200">
+        <div class="flex justify-between items-start mb-4"><h3 class="text-lg font-bold text-slate-900"><i class="fa-solid fa-print text-indigo-600 mr-2"></i> Imprimir Mural</h3><button onclick="closeMuralModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button></div>
+        <p class="text-sm text-slate-600 mb-4">Selecione o período desejado para gerar o relatório e a Curva S das atividades (Mecânica).</p>
+        <p id="mural-error-msg" class="text-rose-600 bg-rose-50 border border-rose-200 rounded p-2 text-xs font-bold mb-3 hidden"></p>
+        <div class="mb-3"><label class="block text-xs font-semibold text-slate-700 mb-1">Data Inicial</label><input type="date" id="mural-start-date" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></div>
+        <div class="mb-4"><label class="block text-xs font-semibold text-slate-700 mb-1">Data Final</label><input type="date" id="mural-end-date" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></div>
+        <button onclick="generateAndPrintMural()" class="w-full bg-indigo-600 text-white font-semibold rounded-lg px-4 py-2 hover:bg-indigo-700 transition-colors">Gerar e Imprimir</button>
+    </div>
+
+    <!-- Print Area (Mural de Montagem - Preview) -->
+    <div id="print-area" class="hidden">
+        <div class="no-print bg-slate-100 border-b border-slate-300 px-6 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sticky top-0 z-50 shadow-md">
+            <div><h2 class="font-bold text-slate-800"><i class="fa-solid fa-file-lines mr-2 text-indigo-600"></i> Relatório Gerado</h2><p id="print-instruction-msg" class="text-xs text-slate-500 mt-1"><i class="fa-solid fa-circle-info mr-1"></i> Se o botão não funcionar, pressione <strong>Ctrl + P</strong>.</p></div>
+            <div class="flex gap-3 w-full sm:w-auto">
+                <button onclick="closePrintPreview()" class="flex-1 sm:flex-none px-5 py-2.5 bg-white border border-slate-300 rounded-lg text-slate-700 font-bold hover:bg-slate-50 transition shadow-sm">Voltar</button>
+                <button onclick="triggerPrint()" class="flex-1 sm:flex-none px-5 py-2.5 bg-indigo-600 text-white rounded-lg font-bold hover:bg-indigo-700 transition shadow-sm"><i class="fa-solid fa-print mr-2"></i> Imprimir Relatório</button>
+            </div>
+        </div>
+        <div class="p-8 max-w-7xl mx-auto bg-white"><div id="print-table-container"></div></div>
+    </div>
+
+    <script>
+        // Usado apenas para envio de e-mail. A sincronização do cronograma usa o Firestore.
+        const APPS_SCRIPT_WEB_APP_URL = "https://script.google.com/a/macros/attosementes.com.br/s/AKfycbzuvzAJk68lu4XDQpfqqSiP-XNkCWlqgP_VSBDF-9XKG1uRziH29mxjmeLiw4nf32ptlg/exec";
+
+        const BASE_DATE = new Date('2026-11-10T12:00:00');
+        let isLoggedIn = false;
+        let currentFilter = null; 
+        let sCurveChart = null;
+        let taskPhotos = {}; 
+        let currentPhotoTaskId = null;
+        let dashboardInitialized = false;
+        let authStateReceived = false;
+        let pendingFirebaseUser = null;
+        let currentFirebaseUser = null;
+
+        // Base de Dados Completa (Todas as Atividades)
+        let projectData = [
+            {
+                id: "1.1", name: "1.1 EXECUÇÃO DAS BASES CIVIS", type: "Civil", weight: 5,
+                tasks: [
+                    { id: "1.1.1", name: "1.1.1 Entrega da Base Civil do Secador", progress: 100, workers: 0, start: "2026-08-31", end: "2026-10-03", deps: [] },
+                    { id: "1.1.2", name: "1.1.2 Entrega da Base Civil do Silo Pulmão", progress: 100, workers: 0, start: "2026-10-15", end: "2026-10-30", deps: ["1.1.1"] },
+                    { id: "1.1.3", name: "1.1.3 Base do silo pulmão liberada para montagem", progress: 50, workers: 0, start: "2026-11-20", end: "2026-11-20", deps: ["1.1.2"] },
+                    { id: "1.1.4", name: "1.1.4 Entrega da Base Civil da Pass4 - TRP6/TRP7/TRP8", progress: 100, workers: 0, start: "2026-10-27", end: "2026-11-10", deps: ["1.1.2"] },
+                    { id: "1.1.5", name: "1.1.5 Base da Passarela 4 liberada para montagem", progress: 0, workers: 0, start: "2026-12-04", end: "2026-12-04", deps: ["1.1.4"] },
+                    { id: "1.1.6", name: "1.1.6 Entrega da Base Civil da Pass2 - TRP3/TRP4", progress: 0, workers: 0, start: "2026-11-10", end: "2026-11-23", deps: ["1.1.4"] },
+                    { id: "1.1.7", name: "1.1.7 Entrega da Base Civil da Pass1 - TRP1/TRP1/TRP2", progress: 0, workers: 0, start: "2026-11-23", end: "2026-12-15", deps: ["1.1.6"] },
+                    { id: "1.1.8", name: "1.1.8 Entrega da Base Civil das Torres Auto. e Elevadores 1, 2 e 3", progress: 20, workers: 0, start: "2026-12-15", end: "2026-12-31", deps: ["1.1.7"] },
+                    { id: "1.1.9", name: "1.1.9 Entrega da Base Civil da Pass3 - TRP5", progress: 0, workers: 0, start: "2026-12-31", end: "2027-01-14", deps: ["1.1.8"] }
+                ]
+            },
+            {
+                id: "1.2", name: "1.2 MONTAGEM MECÂNICA DO SECADOR MEGA", type: "Mecânica", weight: 12, 
+                tasks: [
+                    { id: "1.2.1", name: "1.2.1 Programação Lógica e Automação do Secador", type: "Automação", progress: 0, workers: 0, start: "2026-10-27", end: "2026-11-20", deps: [] },
+                    { id: "1.2.2", name: "1.2.2 Pré montagem dos módulos no barracão", progress: 100, workers: 0, start: "2026-09-28", end: "2026-10-17", deps: [] },
+                    { id: "1.2.3", name: "1.2.3 Montagem dos módulos 1 e 2 na Base do Secador", progress: 100, workers: 0, start: "2026-10-19", end: "2026-10-21", deps: ["1.2.2", "1.1.1"] },
+                    { id: "1.2.4", name: "1.2.4 Fechamento da Base - Instalar chapas", progress: 100, workers: 0, start: "2026-10-26", end: "2026-10-27", deps: ["1.2.3"] },
+                    { id: "1.2.5", name: "1.2.5 Pré montagem dos 10 Exaustores", progress: 100, workers: 0, start: "2026-10-27", end: "2026-10-28", deps: ["1.2.4"] },
+                    { id: "1.2.6", name: "1.2.6 Montagem dos módulos 3 e 4", progress: 100, workers: 0, start: "2026-10-28", end: "2026-10-29", deps: ["1.2.5"] },
+                    { id: "1.2.7", name: "1.2.7 Montagem dos módulos 5 e 6", progress: 100, workers: 0, start: "2026-10-29", end: "2026-10-30", deps: ["1.2.6"] },
+                    { id: "1.2.8", name: "1.2.8 Montagem dos módulos 7 e 8", progress: 100, workers: 0, start: "2026-10-30", end: "2026-10-31", deps: ["1.2.7"] },
+                    { id: "1.2.9", name: "1.2.9 Montagem dos módulos 9 e 10", progress: 100, workers: 0, start: "2026-10-31", end: "2026-11-02", deps: ["1.2.8"] },
+                    { id: "1.2.10", name: "1.2.10 Montagem dos módulos 11 e 12", progress: 100, workers: 0, start: "2026-11-02", end: "2026-11-03", deps: ["1.2.9"] },
+                    { id: "1.2.11", name: "1.2.11 Montagem dos módulos 13 e 14", progress: 100, workers: 0, start: "2026-11-03", end: "2026-11-04", deps: ["1.2.10"] },
+                    { id: "1.2.12", name: "1.2.12 Instalação dos Exaustores", progress: 100, workers: 0, start: "2026-11-04", end: "2026-11-06", deps: ["1.2.11"] },
+                    { id: "1.2.13", name: "1.2.13 Acabamento do Secador", progress: 0, workers: 0, start: "2026-11-06", end: "2026-11-13", deps: ["1.2.12"] },
+                    { id: "1.2.14", name: "1.2.14 Montagem elétrica - Fase 1", type: "Elétrica", progress: 0, workers: 0, start: "2026-11-16", end: "2026-12-09", deps: ["1.2.13"] },
+                    { id: "1.2.15", name: "1.2.15 Montagem elétrica - Fase 2", type: "Elétrica", progress: 0, workers: 0, start: "2026-12-14", end: "2026-12-19", deps: ["1.2.14"] },
+                    { id: "1.2.16", name: "1.2.16 Correia transp conv ct24 (descarga)", progress: 0, workers: 0, start: "2026-12-15", end: "2026-12-18", deps: ["1.2.13"] },
+                    { id: "1.2.17", name: "1.2.17 Instalação do medidor de umidade", type: "Automação", progress: 0, workers: 0, start: "2027-02-10", end: "2027-02-15", deps: ["1.2.16"] },
+                    { id: "1.2.18", name: "1.2.18 Montagem elétrica da CT - Descarga", type: "Elétrica", progress: 0, workers: 0, start: "2026-12-19", end: "2027-01-02", deps: ["1.2.16"] },
+                    { id: "1.2.19", name: "1.2.19 Testes dos Medidores da copagás", type: "Automação", progress: 0, workers: 0, start: "2026-11-03", end: "2026-11-04", deps: [] },
+                    { id: "1.2.20", name: "1.2.20 Montagem da linha de Gás GLP", type: "Pneumática", progress: 0, workers: 0, start: "2026-10-27", end: "2026-12-11", deps: [] },
+                    { id: "1.2.21", name: "1.2.21 Instalção do medidor Mássico", type: "Automação", progress: 0, workers: 0, start: "2026-12-12", end: "2026-12-17", deps: ["1.2.20"] },
+                    { id: "1.2.22", name: "1.2.22 Start Up e Comissionamento do Secador", progress: 0, workers: 0, start: "2027-02-15", end: "2027-02-17", deps: ["1.2.17"] }
+                ]
+            },
+            {
+                id: "1.3", name: "1.3 EMBARQUE DOS EQUIPAMENTOS", type: "Logística", weight: 15, 
+                tasks: [
+                    { id: "1.3.1", name: "1.3.1 Bases - Placa/chumbadores ancoragem", progress: 0, workers: 0, start: "2026-10-23", end: "2026-10-23", arrival: "2026-10-23", arrivalProgress: 0, deps: [] },
+                    { id: "1.3.2", name: "1.3.2 Silo Pulmão - Silo elevado fundo conico", progress: 0, workers: 0, start: "2026-10-23", end: "2026-10-30", arrival: "2026-10-30", arrivalProgress: 100, deps: [] },
+                    { id: "1.3.3", name: "1.3.3 Silo Pulmão - Funil + aeracao 18%", progress: 0, workers: 0, start: "2026-10-23", end: "2026-10-30", arrival: "2026-10-30", arrivalProgress: 100, deps: [] },
+                    { id: "1.3.4", name: "1.3.4 Passarela 4 - Pass fech 4500 x 38000", progress: 0, workers: 0, start: "2026-10-30", end: "2026-11-19", arrival: "2026-11-19", arrivalProgress: 70, deps: [] },
+                    { id: "1.3.5", name: "1.3.5 Passarela 4 - Torre 1000 x 2830 x 17m (A)", progress: 0, workers: 0, start: "2026-10-30", end: "2026-11-19", arrival: "2026-11-19", arrivalProgress: 0, deps: [] },
+                    { id: "1.3.6", name: "1.3.6 Passarela 4 - Torre 1000 x 2830 x 17m (B)", progress: 0, workers: 0, start: "2026-10-30", end: "2026-11-19", arrival: "2026-11-19", arrivalProgress: 0, deps: [] },
+                    { id: "1.3.7", name: "1.3.7 Passarela 4 - Torre 1000 x 2830 x 17m (C)", progress: 0, workers: 0, start: "2026-10-30", end: "2026-11-19", arrival: "2026-11-19", arrivalProgress: 0, deps: [] },
+                    { id: "1.3.8", name: "1.3.8 Passarela 4 - Correia transp ct24 36m (CT7)", progress: 0, workers: 0, start: "2026-11-06", end: "2026-11-19", arrival: "2026-11-19", arrivalProgress: 0, deps: [] },
+                    { id: "1.3.9", name: "1.3.9 Silo Pulmão - Correia transp ct24 09m (sp1)", progress: 0, workers: 0, start: "2026-11-16", end: "2026-11-27", arrival: "2026-11-27", arrivalProgress: 0, deps: [] },
+                    { id: "1.3.10", name: "1.3.10 Silo Pulmão - Correia transp ct24 15m (sp1)", progress: 0, workers: 0, start: "2026-11-16", end: "2026-11-27", arrival: "2026-11-27", arrivalProgress: 0, deps: [] },
+                    { id: "1.3.11", name: "1.3.11 Secador - Correia transp ct24 08m (sec)", progress: 0, workers: 0, start: "2026-11-16", end: "2026-11-27", arrival: "2026-11-27", arrivalProgress: 0, deps: [] },
+                    { id: "1.3.12", name: "1.3.12 Passarela 2 - Pass ab 1870 x 15000", progress: 0, workers: 0, start: "2026-11-30", end: "2026-12-11", arrival: "2026-12-11", arrivalProgress: 0, deps: [] },
+                    { id: "1.3.13", name: "1.3.13 Passarela 2 - Torre 1000 x 2000 x 7.1m (A)", progress: 0, workers: 0, start: "2026-11-30", end: "2026-12-11", arrival: "2026-12-11", arrivalProgress: 0, deps: [] },
+                    { id: "1.3.14", name: "1.3.14 Passarela 2 - Torre 1000 x 2000 x 7.1m (B)", progress: 0, workers: 0, start: "2026-11-30", end: "2026-12-11", arrival: "2026-12-11", arrivalProgress: 0, deps: [] },
+                    { id: "1.3.15", name: "1.3.15 Passarela 2 - Correia transp ct24 19m (CT2)", progress: 0, workers: 0, start: "2026-11-30", end: "2026-12-11", arrival: "2026-12-11", arrivalProgress: 0, deps: [] },
+                    { id: "1.3.16", name: "1.3.16 Passarela 1 - Pass ab 3700 x 15000", progress: 0, workers: 0, start: "2026-11-30", end: "2026-12-11", arrival: "2026-12-11", arrivalProgress: 0, deps: [] },
+                    { id: "1.3.17", name: "1.3.17 Passarela 1 - Torre 1000 x 3000 x 6000", progress: 0, workers: 0, start: "2026-11-30", end: "2026-12-11", arrival: "2026-12-11", arrivalProgress: 0, deps: [] },
+                    { id: "1.3.18", name: "1.3.18 Passarela 1 - Torre 1000 x 5250 x 8000", progress: 0, workers: 0, start: "2026-11-30", end: "2026-12-11", arrival: "2026-12-11", arrivalProgress: 0, deps: [] },
+                    { id: "1.3.19", name: "1.3.19 Passarela 1 - Torre 500 x 2350 x 8000", progress: 0, workers: 0, start: "2026-11-30", end: "2026-12-11", arrival: "2026-12-11", arrivalProgress: 0, deps: [] },
+                    { id: "1.3.20", name: "1.3.20 Passarela 1 - Correia transp ct24 10m (CT1)", progress: 0, workers: 0, start: "2026-11-30", end: "2026-12-11", arrival: "2026-12-11", arrivalProgress: 0, deps: [] },
+                    { id: "1.3.21", name: "1.3.21 Trippers - Lote pecas carro despejo fixo", progress: 0, workers: 0, start: "2026-12-07", end: "2026-12-10", arrival: "2026-12-10", arrivalProgress: 0, deps: [] },
+                    { id: "1.3.22", name: "1.3.22 Torres Auto/Elev. - Torre met 5.0m x 41m", progress: 0, workers: 0, start: "2026-12-07", end: "2026-12-18", arrival: "2026-12-18", arrivalProgress: 0, deps: [] },
+                    { id: "1.3.23", name: "1.3.23 Torres Auto/Elev. - Torre met 2.5m x 39m", progress: 0, workers: 0, start: "2027-01-05", end: "2027-01-15", arrival: "2027-01-15", arrivalProgress: 0, deps: [] },
+                    { id: "1.3.24", name: "1.3.24 Torres Auto/Elev. - Elev. caneca 120t/h 39m", progress: 0, workers: 0, start: "2027-01-05", end: "2027-01-15", arrival: "2027-01-15", arrivalProgress: 0, deps: [] },
+                    { id: "1.3.25", name: "1.3.25 Torres Auto/Elev. - Elev. caneca 80t 30m", progress: 0, workers: 0, start: "2027-01-05", end: "2027-01-15", arrival: "2027-01-15", arrivalProgress: 0, deps: [] },
+                    { id: "1.3.26", name: "1.3.26 Torres Auto/Elev. - Elev. caneca 80t 41m", progress: 0, workers: 0, start: "2027-01-05", end: "2027-01-15", arrival: "2027-01-15", arrivalProgress: 0, deps: [] },
+                    { id: "1.3.27", name: "1.3.27 Passarela 3 - Pass ab 3600 x 11500", progress: 0, workers: 0, start: "2027-01-05", end: "2027-01-15", arrival: "2027-01-15", arrivalProgress: 0, deps: [] },
+                    { id: "1.3.28", name: "1.3.28 Passarela 3 - Torre 1000 x 1700 x 5000", progress: 0, workers: 0, start: "2027-01-05", end: "2027-01-15", arrival: "2027-01-15", arrivalProgress: 0, deps: [] },
+                    { id: "1.3.29", name: "1.3.29 Passarela 3 - Correia transp ct24 06.5m (CT3)", progress: 0, workers: 0, start: "2027-01-05", end: "2027-01-15", arrival: "2027-01-15", arrivalProgress: 0, deps: [] },
+                    { id: "1.3.30", name: "1.3.30 Interligação - Lote de tubulação", progress: 0, workers: 0, start: "2027-01-05", end: "2027-01-15", arrival: "2027-01-15", arrivalProgress: 0, deps: [] }
+                ]
+            },
+            {
+                id: "1.4", name: "1.4 MONTAGEM MECANICA DO SILO PULMÃO", type: "Mecânica", weight: 10,
+                tasks: [
+                    { id: "1.4.1", name: "1.4.1 Separação dos Materiais", progress: 100, workers: 0, start: "2026-10-30", end: "2026-10-31", deps: [] },
+                    { id: "1.4.2", name: "1.4.2 Teto do silo", progress: 0, workers: 0, start: "2026-11-03", end: "2026-11-09", deps: ["1.4.1"] }, 
+                    { id: "1.4.3", name: "1.4.3 Corpo do silo", progress: 0, workers: 0, start: "2026-11-10", end: "2026-11-19", deps: ["1.4.2"] }, 
+                    { id: "1.4.4", name: "1.4.4 Funil + aeracao 18%", progress: 0, workers: 0, start: "2026-11-24", end: "2026-12-02", deps: ["1.4.3"] },
+                    { id: "1.4.5", name: "1.4.5 Correia transp conv ct24 (descarga sp1 9m)", progress: 0, workers: 0, start: "2026-12-03", end: "2026-12-08", deps: ["1.4.4"] },
+                    { id: "1.4.6", name: "1.4.6 Correia transp conv ct24 (descarga sp1 15m)", progress: 0, workers: 0, start: "2026-12-09", end: "2026-12-14", deps: ["1.4.5"] },
+                    { id: "1.4.7", name: "1.4.7 Montagem elétrica do Silo Pulmão", type: "Elétrica", progress: 0, workers: 0, start: "2026-12-03", end: "2026-12-11", deps: ["1.4.4"] },
+                    { id: "1.4.8", name: "1.4.8 Montagem elétrica da CT descarga 1", type: "Elétrica", progress: 0, workers: 0, start: "2026-12-09", end: "2026-12-17", deps: ["1.4.5"] },
+                    { id: "1.4.9", name: "1.4.9 Montagem elétrica da CT descarga 2", type: "Elétrica", progress: 0, workers: 0, start: "2026-12-15", end: "2026-12-29", deps: ["1.4.6"] },
+                    { id: "1.4.10", name: "1.4.10 Termometria Procer", type: "Automação", progress: 0, workers: 0, start: "2026-12-14", end: "2026-12-16", deps: ["1.4.6"] },
+                    { id: "1.4.11", name: "1.4.11 Medidor de umidade do Silo Pulmão", type: "Automação", progress: 0, workers: 0, start: "2026-12-08", end: "2026-12-14", deps: ["1.4.5"] },
+                    { id: "1.4.12", name: "1.4.12 Teste elétrico em vazio (sem produto)", type: "Elétrica", progress: 0, workers: 0, start: "2026-12-16", end: "2026-12-17", deps: ["1.4.10"] }
+                ]
+            },
+            {
+                id: "1.5", name: "1.5 MONTAGEM MECANICA DA PASSARELA 4 E CT 7", type: "Mecânica", weight: 6,
+                tasks: [
+                    { id: "1.5.1", name: "1.5.1 Separação dos Materiais", progress: 0, workers: 0, start: "2026-11-05", end: "2026-11-06", deps: [] },
+                    { id: "1.5.2", name: "1.5.2 Pré - montagem torres, passarela 4 e ct7", progress: 0, workers: 0, start: "2026-11-09", end: "2026-11-30", deps: ["1.5.1"] },
+                    { id: "1.5.3", name: "1.5.3 Pass fech 4500 x 38000", progress: 0, workers: 0, start: "2026-12-01", end: "2026-12-07", deps: ["1.5.2"] },
+                    { id: "1.5.4", name: "1.5.4 Torre 1000 x 2830 x 17m (A)", progress: 0, workers: 0, start: "2026-12-01", end: "2026-12-07", deps: ["1.5.2"] },
+                    { id: "1.5.5", name: "1.5.5 Torre 1000 x 2830 x 17m (B)", progress: 0, workers: 0, start: "2026-12-01", end: "2026-12-07", deps: ["1.5.2"] },
+                    { id: "1.5.6", name: "1.5.6 Torre 1000 x 2830 x 17m (C)", progress: 0, workers: 0, start: "2026-12-01", end: "2026-12-07", deps: ["1.5.2"] },
+                    { id: "1.5.7", name: "1.5.7 Correia transp conv ct24 36.0 m", progress: 0, workers: 0, start: "2026-12-01", end: "2026-12-07", deps: ["1.5.3"] },
+                    { id: "1.5.8", name: "1.5.8 Montagem Elétrica barramento pass. 4", type: "Elétrica", progress: 0, workers: 0, start: "2026-12-08", end: "2026-12-16", deps: ["1.5.3"] },
+                    { id: "1.5.9", name: "1.5.9 Montagem Elétrica Correia ct24 36.0m", type: "Elétrica", progress: 0, workers: 0, start: "2026-12-08", end: "2026-12-16", deps: ["1.5.7"] },
+                    { id: "1.5.10", name: "1.5.10 Montagem e Instalação sensores NR-12", type: "Automação", progress: 0, workers: 0, start: "2026-12-08", end: "2026-12-10", deps: ["1.5.7"] },
+                    { id: "1.5.11", name: "1.5.11 Teste elétrico em vazio (sem produto)", type: "Elétrica", progress: 0, workers: 0, start: "2026-12-10", end: "2026-12-11", deps: ["1.5.10"] }
+                ]
+            },
+            {
+                id: "1.6", name: "1.6 MONTAGEM MECANICA DA PASSARELA 2 E CT 2", type: "Mecânica", weight: 6,
+                tasks: [
+                    { id: "1.6.1", name: "1.6.1 Separação dos Materiais", progress: 0, workers: 0, start: "2026-12-03", end: "2026-12-04", deps: [] },
+                    { id: "1.6.2", name: "1.6.2 Pré-montagem torres, passarela 2", progress: 0, workers: 0, start: "2026-12-07", end: "2026-12-11", deps: ["1.6.1"] },
+                    { id: "1.6.3", name: "1.6.3 Pass ab 1870 x 15000", progress: 0, workers: 0, start: "2026-12-14", end: "2026-12-18", deps: ["1.6.2"] },
+                    { id: "1.6.4", name: "1.6.4 Torre 1000 x 2000 x 7.1 m (A)", progress: 0, workers: 0, start: "2026-12-14", end: "2026-12-18", deps: ["1.6.2"] },
+                    { id: "1.6.5", name: "1.6.5 Torre 1000 x 2000 x 7.1 m (B)", progress: 0, workers: 0, start: "2026-12-14", end: "2026-12-18", deps: ["1.6.2"] },
+                    { id: "1.6.6", name: "1.6.6 Correia transp conv ct24 19.0 m", progress: 0, workers: 0, start: "2026-12-14", end: "2027-01-12", deps: ["1.6.3"] },
+                    { id: "1.6.7", name: "1.6.7 Montagem Elétrica barramento - Fase 1", type: "Elétrica", progress: 0, workers: 0, start: "2026-12-18", end: "2027-01-01", deps: ["1.6.3"] },
+                    { id: "1.6.8", name: "1.6.8 Montagem Elétrica Correia ct24 19.0 m", type: "Elétrica", progress: 0, workers: 0, start: "2027-01-12", end: "2027-01-20", deps: ["1.6.6"] },
+                    { id: "1.6.9", name: "1.6.9 Teste elétrico em vazio", type: "Elétrica", progress: 0, workers: 0, start: "2027-01-20", end: "2027-01-21", deps: ["1.6.8"] }
+                ]
+            },
+            {
+                id: "1.7", name: "1.7 MONTAGEM MECANICA DOS CARROS TRIPPERS", type: "Mecânica", weight: 5,
+                tasks: [
+                    { id: "1.7.1", name: "1.7.1 Separação dos Materiais", progress: 0, workers: 0, start: "2026-12-10", end: "2026-12-11", deps: [] },
+                    { id: "1.7.2", name: "1.7.2 Lote pecas carro despejo fixo 1", progress: 0, workers: 0, start: "2026-12-14", end: "2026-12-18", deps: ["1.7.1"] },
+                    { id: "1.7.3", name: "1.7.3 Lote pecas carro despejo fixo 2", progress: 0, workers: 0, start: "2026-12-14", end: "2026-12-18", deps: ["1.7.1"] },
+                    { id: "1.7.4", name: "1.7.4 Montagem Elétrica - Tripper 1", type: "Elétrica", progress: 0, workers: 0, start: "2026-12-18", end: "2027-01-11", deps: ["1.7.2"] },
+                    { id: "1.7.5", name: "1.7.5 Montagem Elétrica - Tripper 2", type: "Elétrica", progress: 0, workers: 0, start: "2026-12-18", end: "2027-01-11", deps: ["1.7.3"] },
+                    { id: "1.7.6", name: "1.7.6 Teste elétrico em vazio", type: "Elétrica", progress: 0, workers: 0, start: "2027-01-11", end: "2027-01-12", deps: ["1.7.4", "1.7.5"] }
+                ]
+            },
+            {
+                id: "1.8", name: "1.8 MONTAGEM MECANICA DA PASSARELA 1 E CT 1", type: "Mecânica", weight: 5,
+                tasks: [
+                    { id: "1.8.1", name: "1.8.1 Separação dos Materiais", progress: 0, workers: 0, start: "2026-12-11", end: "2026-12-12", deps: [] },
+                    { id: "1.8.2", name: "1.8.2 Pré - montagem", progress: 0, workers: 0, start: "2026-12-14", end: "2026-12-18", deps: ["1.8.1"] },
+                    { id: "1.8.3", name: "1.8.3 Pass ab 3700 x 15000", progress: 0, workers: 0, start: "2027-01-05", end: "2027-01-11", deps: ["1.8.2"] },
+                    { id: "1.8.4", name: "1.8.4 Torre 1000 x 3000 x 6000", progress: 0, workers: 0, start: "2027-01-05", end: "2027-01-11", deps: ["1.8.2"] },
+                    { id: "1.8.5", name: "1.8.5 Torre 1000 x 5250 x 8000", progress: 0, workers: 0, start: "2027-01-05", end: "2027-01-11", deps: ["1.8.2"] },
+                    { id: "1.8.6", name: "1.8.6 Torre 500 x 2350 x 8000", progress: 0, workers: 0, start: "2027-01-05", end: "2027-01-11", deps: ["1.8.2"] },
+                    { id: "1.8.7", name: "1.8.7 Correia transp conv ct24 10.0 m", progress: 0, workers: 0, start: "2027-01-05", end: "2027-01-11", deps: ["1.8.3"] },
+                    { id: "1.8.8", name: "1.8.8 Montagem Elétrica barramento", type: "Elétrica", progress: 0, workers: 0, start: "2027-01-12", end: "2027-01-20", deps: ["1.8.3"] },
+                    { id: "1.8.9", name: "1.8.9 Montagem Elétrica Correia ct24 10.0 m", type: "Elétrica", progress: 0, workers: 0, start: "2027-01-12", end: "2027-01-20", deps: ["1.8.7"] },
+                    { id: "1.8.10", name: "1.8.10 Teste elétrico em vazio", type: "Elétrica", progress: 0, workers: 0, start: "2027-01-20", end: "2027-01-21", deps: ["1.8.8", "1.8.9"] }
+                ]
+            },
+            {
+                id: "1.9", name: "1.9 MONTAGEM MECANICA DAS TORRES + ELEVADORES", type: "Mecânica", weight: 7,
+                tasks: [
+                    { id: "1.9.1", name: "1.9.1 Separação dos Materiais", progress: 0, workers: 0, start: "2027-01-04", end: "2027-01-05", deps: [] },
+                    { id: "1.9.2", name: "1.9.2 Pré-montagem torres + elevadores", progress: 0, workers: 0, start: "2027-01-06", end: "2027-02-02", deps: ["1.9.1"] },
+                    { id: "1.9.3", name: "1.9.3 Torre met 2.5m x 3.0m x 39m", progress: 0, workers: 0, start: "2027-02-03", end: "2027-02-05", deps: ["1.9.2"] },
+                    { id: "1.9.4", name: "1.9.4 Torre met 5.0m x 5.0m x 41m", progress: 0, workers: 0, start: "2027-02-03", end: "2027-02-05", deps: ["1.9.2"] },
+                    { id: "1.9.5", name: "1.9.5 Elevador caneca 120t/h 39.0m", progress: 0, workers: 0, start: "2027-02-03", end: "2027-02-05", deps: ["1.9.3"] },
+                    { id: "1.9.6", name: "1.9.6 Elevador caneca 80t/h 30.0m", progress: 0, workers: 0, start: "2027-02-03", end: "2027-02-05", deps: ["1.9.3", "1.9.4"] },
+                    { id: "1.9.7", name: "1.9.7 Elevador caneca 80t/h 41.0m", progress: 0, workers: 0, start: "2027-02-03", end: "2027-02-05", deps: ["1.9.4"] },
+                    { id: "1.9.8", name: "1.9.8 Ajustes Mecânico + Acabamentos", progress: 0, workers: 0, start: "2027-02-03", end: "2027-02-05", deps: ["1.9.5", "1.9.6", "1.9.7"] },
+                    { id: "1.9.9", name: "1.9.9 Montagem elétrica Elevador 39M", type: "Elétrica", progress: 0, workers: 0, start: "2027-02-06", end: "2027-02-15", deps: ["1.9.8"] },
+                    { id: "1.9.10", name: "1.9.10 Montagem elétrica Elevador 30M", type: "Elétrica", progress: 0, workers: 0, start: "2027-02-06", end: "2027-02-15", deps: ["1.9.8"] },
+                    { id: "1.9.11", name: "1.9.11 Montagem elétrica Elevador 41M", type: "Elétrica", progress: 0, workers: 0, start: "2027-02-06", end: "2027-02-15", deps: ["1.9.8"] },
+                    { id: "1.9.12", name: "1.9.12 Teste elétrico em vazio", type: "Elétrica", progress: 0, workers: 0, start: "2027-02-15", end: "2027-02-16", deps: ["1.9.9", "1.9.10", "1.9.11"] }
+                ]
+            },
+            {
+                id: "1.10", name: "1.10 MONTAGEM MECANICA DA PASSARELA 3 E CT 3", type: "Mecânica", weight: 5,
+                tasks: [
+                    { id: "1.10.1", name: "1.10.1 Separação dos Materiais", progress: 0, workers: 0, start: "2027-01-18", end: "2027-01-19", deps: [] },
+                    { id: "1.10.2", name: "1.10.2 Pré-montagem torre, passarela 3 e ct3", progress: 0, workers: 0, start: "2027-01-20", end: "2027-02-02", deps: ["1.10.1"] },
+                    { id: "1.10.3", name: "1.10.3 Pass ab 3600 x 11500", progress: 0, workers: 0, start: "2027-02-04", end: "2027-02-10", deps: ["1.10.2"] },
+                    { id: "1.10.4", name: "1.10.4 Torre 1000 x 1700 x 5000", progress: 0, workers: 0, start: "2027-02-04", end: "2027-02-10", deps: ["1.10.2"] },
+                    { id: "1.10.5", name: "1.10.5 Correia transp conv ct24 06.5m", progress: 0, workers: 0, start: "2027-02-04", end: "2027-02-10", deps: ["1.10.3"] },
+                    { id: "1.10.6", name: "1.10.6 Programação Automação Silo e Equip.", type: "Automação", progress: 0, workers: 0, start: "2026-11-03", end: "2027-02-19", deps: [] },
+                    { id: "1.10.7", name: "1.10.7 Montagem Elétrica barramento", type: "Elétrica", progress: 0, workers: 0, start: "2027-02-11", end: "2027-02-19", deps: ["1.10.3"] },
+                    { id: "1.10.8", name: "1.10.8 Montagem Elétrica Correia ct24 06.5M", type: "Elétrica", progress: 0, workers: 0, start: "2027-02-11", end: "2027-02-19", deps: ["1.10.5"] },
+                    { id: "1.10.9", name: "1.10.9 Teste elétrico em vazio", type: "Elétrica", progress: 0, workers: 0, start: "2027-02-19", end: "2027-02-20", deps: ["1.10.7", "1.10.8"] }
+                ]
+            },
+            {
+                id: "1.11", name: "1.11 INTERLIGAÇÃO E ACABAMENTOS FINAIS", type: "Mecânica", weight: 9,
+                tasks: [
+                    { id: "1.11.1", name: "1.11.1 Separação dos Materiais", progress: 0, workers: 0, start: "2027-01-16", end: "2027-01-18", deps: [] },
+                    { id: "1.11.2", name: "1.11.2 Instalação de escadas e interligação", progress: 0, workers: 0, start: "2027-01-19", end: "2027-02-15", deps: ["1.11.1"] },
+                    { id: "1.11.3", name: "1.11.3 Montagem Elétrica - valvulas amort.", type: "Elétrica", progress: 0, workers: 0, start: "2027-02-15", end: "2027-02-25", deps: ["1.11.2"] },
+                    { id: "1.12.1", name: "1.12.1 Start-up e comissionamento (vazio)", progress: 0, workers: 0, start: "2027-02-16", end: "2027-02-16", deps: ["1.11.3"] },
+                    { id: "1.12.2", name: "1.12.2 Start-up e comissionamento (produto)", progress: 0, workers: 0, start: "2027-02-16", end: "2027-02-16", deps: ["1.12.1"] },
+                    { id: "1.13.1", name: "1.13.1 Acabamentos finais", progress: 0, workers: 0, start: "2027-02-17", end: "2027-03-02", deps: ["1.12.2"] },
+                    { id: "1.14.1", name: "1.14.1 Entrega dos arquivos (Book Digital)", progress: 0, workers: 0, start: "2027-02-22", end: "2027-02-27", deps: ["1.13.1"] },
+                    { id: "1.14.2", name: "1.14.2 Check List e Entrega Obra", progress: 0, workers: 0, start: "2027-03-03", end: "2027-03-05", deps: ["1.14.1"] }
+                ]
+            }
+        ];
+
+
+        // --- SISTEMA DE COMPARTILHAMENTO DE ESTADO VIA URL E LOCALSTORAGE ---
+        function generateStateString() {
+            const values = [];
+            projectData.forEach(g => {
+                g.tasks.forEach(t => {
+                    const prog = g.type === 'Logística' ? (t.arrivalProgress || 0) : (t.progress || 0);
+                    const work = t.workers || 0;
+                    values.push(`${prog}-${work}`);
+                });
+            });
+            return btoa(values.join(','));
+        }
+
+        function applyStateString(encodedStr) {
+            try {
+                const values = atob(encodedStr).split(',');
+                let i = 0;
+                projectData.forEach(g => {
+                    g.tasks.forEach(t => {
+                        if (values[i]) {
+                            const [prog, work] = values[i].split('-');
+                            if (g.type === 'Logística') t.arrivalProgress = parseInt(prog) || 0;
+                            else t.progress = parseInt(prog) || 0;
+                            t.workers = parseInt(work) || 0;
+                        }
+                        i++;
+                    });
+                });
+                return true;
+            } catch (e) {
+                console.error("Erro ao ler estado do Link", e);
+                return false;
+            }
+        }
+
+        // --- SINCRONIZAÇÃO EM TEMPO REAL (FIRESTORE) ---
+        let isRemoteUpdate = false;
+
+        function saveToLocal() {
+            localStorage.setItem('secadorDashboardFullData', JSON.stringify(projectData));
+            if (!isRemoteUpdate && window.queueFirestoreSave) window.queueFirestoreSave();
+        }
+
+        window.getProjectData = () => projectData;
+        window.applyRemoteProjectData = function(data) {
+            isRemoteUpdate = true;
+            try {
+                projectData = data;
+                localStorage.setItem('secadorDashboardFullData', JSON.stringify(projectData));
+                renderTasks();
+            } finally {
+                isRemoteUpdate = false;
+            }
+        };
+        window.setSyncStatus = function(message, state) {
+            const indicator = document.getElementById('sync-status');
+            const text = document.getElementById('sync-status-text');
+            const dot = document.getElementById('sync-status-dot');
+            if (!indicator || !text || !dot) return;
+            text.innerText = message;
+            dot.className = `w-2 h-2 rounded-full ${state === 'connected' ? 'bg-emerald-400' : (state === 'error' ? 'bg-rose-400' : 'bg-amber-400')}`;
+            indicator.title = message;
+        };
+
+        window.copyShareLink = function() {
+            const url = new URL(window.location.href);
+            const state = generateStateString();
+            url.searchParams.set('s', state); 
+            
+            navigator.clipboard.writeText(url.toString()).then(() => {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Link Copiado!',
+                    text: 'Modo Tempo Real ativado! Agora seus parceiros verão as mudanças ao vivo.',
+                    timer: 3000,
+                    showConfirmButton: false
+                });
+            });
+            return url.toString();
+        }
+
+        // --- SISTEMA DE NOTIFICAÇÃO POR E-MAIL ---
+        window.openNotifyModal = function() {
+            document.getElementById('modal-bg').classList.remove('hidden');
+            document.getElementById('notify-modal').classList.remove('hidden');
+            
+            const globalPerc = document.getElementById('global-percent').innerText;
+            const plannedPerc = document.getElementById('planned-progress').innerText;
+            const devText = document.getElementById('deviation-value-text').innerText;
+            
+            let delayedTasks = [];
+            projectData.forEach(g => {
+                g.tasks.forEach(t => {
+                    const expected = Math.round(getExpectedProgress(t, BASE_DATE));
+                    const actual = g.type === 'Logística' ? (t.arrivalProgress || 0) : t.progress;
+                    if (expected > 0 && actual < expected) {
+                        delayedTasks.push(`- ${t.name} (Real: ${actual}% | Prev: ${expected}%)`);
+                    }
+                });
+            });
+
+            let preview = `👷 ATUALIZAÇÃO DA OBRA - Secador Torre 60 T/H\nData: ${new Date().toLocaleDateString('pt-BR')}\n\n`;
+            preview += `📊 STATUS GLOBAL:\nAv. Realizado: ${globalPerc}\nAv. Planejado: ${plannedPerc}\nDesvio Atual: ${devText}\n\n`;
+            
+            if(delayedTasks.length > 0) {
+                preview += `⚠️ PRINCIPAIS ATRASOS:\n${delayedTasks.slice(0, 4).join('\n')}\n${delayedTasks.length > 4 ? `+ ${delayedTasks.length - 4} outras atividades...` : ''}\n\n`;
+            } else { preview += `✅ Nenhuma atividade em atraso!\n\n`; }
+            preview += `🔗 Clique no link abaixo para ver o Dashboard interativo atualizado.`;
+            document.getElementById('notify-preview').innerText = preview;
+        }
+
+        window.closeNotifyModal = function() {
+            document.getElementById('modal-bg').classList.add('hidden');
+            document.getElementById('notify-modal').classList.add('hidden');
+        }
+
+        window.sendNotification = async function() {
+            const emails = document.getElementById('notify-emails').value;
+            const link = window.copyShareLink(); 
+            const previewText = document.getElementById('notify-preview').innerText;
+            
+            if(!emails) { Swal.fire('Atenção', 'Insira pelo menos um e-mail.', 'warning'); return; }
+            if(APPS_SCRIPT_WEB_APP_URL === "COLE_AQUI_A_URL_DO_APPS_SCRIPT_GERADA_NO_GOOGLE") {
+                Swal.fire('Configuração Pendente', 'Você precisa colar a URL do Google Apps Script no código fonte da página (variável APPS_SCRIPT_WEB_APP_URL).', 'info'); return;
+            }
+
+            closeNotifyModal();
+            Swal.fire({ title: 'Enviando Relatório...', text: 'Comunicando com o servidor do Google.', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }});
+
+            try {
+                await fetch(APPS_SCRIPT_WEB_APP_URL, {
+                    method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action: 'sendEmail', emails: emails, subject: "Atualização de Status da Obra - Secador Torre 60 T/H", body: previewText + '\n\n' + link })
+                });
+                Swal.fire({ icon: 'success', title: 'E-mail Enviado!', text: 'O relatório foi disparado automaticamente via servidor.', timer: 3500, showConfirmButton: false });
+            } catch (error) {
+                Swal.fire('Erro', 'Falha ao enviar e-mail. Verifique sua conexão e a URL do Apps Script.', 'error');
+            }
+        }
+
+        // --- SISTEMA DE IMPORTAÇÃO E EXPORTAÇÃO ---
+        window.openScheduleModal = function() {
+            document.getElementById('modal-bg').classList.remove('hidden');
+            document.getElementById('schedule-modal').classList.remove('hidden');
+        }
+
+        window.closeScheduleModal = function() {
+            document.getElementById('modal-bg').classList.add('hidden');
+            document.getElementById('schedule-modal').classList.add('hidden');
+            document.getElementById('import-file').value = "";
+        }
+
+        window.exportSchedule = function() {
+            const dataStr = JSON.stringify(projectData, null, 2);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `cronograma_secador_${new Date().toISOString().slice(0,10)}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            closeScheduleModal();
+            Swal.fire('Exportado!', 'O arquivo do cronograma foi baixado com sucesso.', 'success');
+        }
+
+        function parseExcelDate(dateVal) {
+            if (!dateVal) return null;
+            if (typeof dateVal === 'number') {
+                const date = new Date(Math.round((dateVal - 25569) * 86400 * 1000));
+                date.setMinutes(date.getMinutes() + date.getTimezoneOffset());
+                return date.toISOString().split('T')[0];
+            }
+            if (typeof dateVal === 'string') {
+                const match = dateVal.match(/(\d{2})\/(\d{2})\/(\d{2,4})/);
+                if (match) {
+                    let year = match[3];
+                    if (year.length === 2) year = "20" + year;
+                    return `${year}-${match[2]}-${match[1]}`;
+                }
+            }
+            return null;
+        }
+
+        window.importSchedule = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const ext = file.name.split('.').pop().toLowerCase();
+
+            if (ext === 'json') {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const importedData = JSON.parse(e.target.result);
+                        if (Array.isArray(importedData)) {
+                            projectData = importedData;
+                            saveToLocal(); 
+                            renderTasks();
+                            closeScheduleModal();
+                            Swal.fire('Importado!', 'O cronograma foi atualizado com as novas atividades e datas.', 'success');
+                        } else throw new Error("Formato inválido");
+                    } catch (error) { Swal.fire('Erro', 'O arquivo importado não é um cronograma JSON válido.', 'error'); }
+                };
+                reader.readAsText(file);
+            } else if (ext === 'xlsx' || ext === 'xls' || ext === 'csv') {
+                Swal.fire({ title: 'Lendo Planilha...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, {type: 'array'});
+                        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                        const jsonRows = XLSX.utils.sheet_to_json(worksheet);
+
+                        let updatedCount = 0;
+                        jsonRows.forEach(row => {
+                            let taskName = row['Nome da Tarefa'] || row['Nome'] || row['Name'] || row['Task Name'] || row['Atividade'];
+                            let start = row['Início'] || row['Inicio'] || row['Start'];
+                            let end = row['Término'] || row['Termino'] || row['Finish'] || row['Fim'];
+                            let prog = row['% concluída'] || row['% física concluída'] || row['Progresso'] || row['% Complete'];
+
+                            if(taskName) {
+                                projectData.forEach(g => {
+                                    g.tasks.forEach(t => {
+                                        if (t.name.toLowerCase().includes(taskName.toLowerCase()) || taskName.toLowerCase().includes(t.id)) {
+                                            if(start) { let ps = parseExcelDate(start); if(ps) t.start = ps; }
+                                            if(end) { let pe = parseExcelDate(end); if(pe) { if(g.type === 'Logística') t.arrival = pe; else t.end = pe; } }
+                                            if(prog !== undefined) {
+                                                let p = parseInt(prog);
+                                                if(!isNaN(p)) { if(g.type === 'Logística') t.arrivalProgress = p; else t.progress = p; }
+                                            }
+                                            updatedCount++;
+                                        }
+                                    });
+                                });
+                            }
+                        });
+
+                        if(updatedCount > 0) {
+                            saveToLocal();
+                            renderTasks();
+                            closeScheduleModal();
+                            Swal.fire('Importado com Sucesso!', `O sistema cruzou os dados e atualizou ${updatedCount} atividades a partir da planilha.`, 'success');
+                        } else {
+                            Swal.fire('Atenção', 'Planilha lida, mas nenhuma tarefa correspondente encontrada. Verifique se a coluna se chama "Nome da Tarefa".', 'warning');
+                        }
+                    } catch (error) {
+                        console.error(error);
+                        Swal.fire('Erro', 'Falha ao processar o arquivo Excel.', 'error');
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            } else {
+                closeScheduleModal();
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Formato Visual Não Suportado',
+                    html: `O navegador não consegue extrair dados de <b>${file.name}</b> de forma estruturada.<br><br><b>Como atualizar:</b><br>No MS Project, salve o arquivo como <b>Excel (.xlsx)</b> e importe aqui para atualização automática.`
+                });
+            }
+            event.target.value = "";
+        }
+
+        // --- SISTEMA DE FOTOS RAPIDO ---
+        window.openPhotoModal = function(taskId, taskName) {
+            currentPhotoTaskId = taskId;
+            document.getElementById('photo-modal-title').innerText = `Imagens: ${taskName}`;
+            document.getElementById('photo-modal').classList.remove('hidden');
+            renderPhotos();
+        }
+
+        window.closePhotoModal = function() {
+            document.getElementById('photo-modal').classList.add('hidden');
+            currentPhotoTaskId = null;
+        }
+
+        window.handlePhotoUpload = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                if (!taskPhotos[currentPhotoTaskId]) taskPhotos[currentPhotoTaskId] = [];
+                taskPhotos[currentPhotoTaskId].unshift(e.target.result);
+                renderPhotos();
+                renderTasks(); 
+            };
+            reader.readAsDataURL(file);
+            event.target.value = ''; 
+        }
+
+        function renderPhotos() {
+            const grid = document.getElementById('photo-grid');
+            const photos = taskPhotos[currentPhotoTaskId] || [];
+            if (photos.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-12 flex flex-col items-center justify-center"><div class="w-16 h-16 bg-slate-100 text-slate-300 rounded-full flex items-center justify-center text-3xl mb-4"><i class="fa-solid fa-images"></i></div><p class="text-slate-500 font-medium">Nenhuma imagem adicionada ainda.</p></div>`;
+                return;
+            }
+            grid.innerHTML = photos.map(src => `<div class="aspect-square rounded-xl overflow-hidden border border-slate-200 shadow-sm cursor-pointer hover:shadow-md hover:scale-105 transition-all duration-300 bg-white p-1" onclick="window.open('${src}', '_blank')"><img src="${src}" class="w-full h-full object-cover rounded-lg"></div>`).join('');
+        }
+
+        // --- MODAL DE DETALHES ---
+        window.openDetailsModal = function(type) {
+            const modal = document.getElementById('details-modal');
+            const titleEl = document.getElementById('details-modal-title');
+            const listEl = document.getElementById('details-list');
+            listEl.innerHTML = '';
+            
+            let title = '';
+            let matchedTasks = [];
+
+            projectData.forEach(group => {
+                group.tasks.forEach(task => {
+                    const expected = Math.round(getExpectedProgress(task, BASE_DATE));
+                    const actualProg = (group.type === 'Logística') ? (task.arrivalProgress || 0) : task.progress;
+                    
+                    if (type === 'planned' && expected > 0) matchedTasks.push({task, group, expected, actualProg});
+                    else if (type === 'actual' && actualProg > 0) matchedTasks.push({task, group, expected, actualProg});
+                    else if (type === 'deviation' && expected > 0 && actualProg < expected) matchedTasks.push({task, group, expected, actualProg});
+                });
+            });
+
+            if (type === 'planned') title = '<i class="fa-regular fa-calendar-check text-indigo-500"></i> Atividades Previstas';
+            else if (type === 'actual') title = '<i class="fa-solid fa-list-check text-blue-500"></i> Atividades Realizadas';
+            else if (type === 'deviation') title = '<i class="fa-solid fa-triangle-exclamation text-rose-500"></i> Atividades em Atraso';
+
+            titleEl.innerHTML = `${title} <span class="text-sm font-normal text-slate-500 ml-2">(${matchedTasks.length})</span>`;
+
+            if (matchedTasks.length === 0) {
+                listEl.innerHTML = '<div class="text-center py-10 text-slate-500"><i class="fa-solid fa-check-circle text-4xl block mb-3 opacity-50"></i>Nenhuma atividade nesta categoria.</div>';
+            } else {
+                matchedTasks.forEach(item => {
+                    let statusColor = item.actualProg >= item.expected ? "text-emerald-600" : "text-rose-600";
+                    listEl.innerHTML += `
+                        <div class="py-4 hover:bg-slate-50 border-b border-slate-100 last:border-0 px-2 transition-colors">
+                            <div class="flex justify-between items-start gap-4">
+                                <div class="flex-1">
+                                    <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">${item.group.name}</span>
+                                    <p class="text-sm font-bold text-slate-800">${item.task.name}</p>
+                                </div>
+                                <div class="text-right flex items-center gap-4 bg-white border border-slate-100 px-3 py-2 rounded-lg shadow-sm shrink-0">
+                                    <div class="text-center pr-3 border-r border-slate-100">
+                                        <p class="text-[10px] text-slate-400 font-semibold uppercase">Previsto</p>
+                                        <p class="text-sm font-bold text-slate-700">${item.expected}%</p>
+                                    </div>
+                                    <div class="text-center pl-1">
+                                        <p class="text-[10px] text-slate-400 font-semibold uppercase">Realizado</p>
+                                        <p class="text-sm font-bold ${statusColor}">${item.actualProg}%</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+                });
+            }
+            modal.classList.remove('hidden');
+        }
+        window.closeDetailsModal = function() { document.getElementById('details-modal').classList.add('hidden'); }
+
+        // --- SISTEMA MURAL IMPRESSÃO ---
+        window.openMuralModal = function() {
+            document.getElementById('modal-bg').classList.remove('hidden');
+            document.getElementById('mural-modal').classList.remove('hidden');
+            document.getElementById('mural-start-date').value = "2026-11-03";
+            document.getElementById('mural-end-date').value = "2026-11-10";
+        }
+        window.closeMuralModal = function() {
+            if(document.getElementById('login-modal').classList.contains('hidden') && document.getElementById('photo-modal').classList.contains('hidden') && document.getElementById('details-modal').classList.contains('hidden') && document.getElementById('schedule-modal').classList.contains('hidden') && document.getElementById('notify-modal').classList.contains('hidden')) {
+                document.getElementById('modal-bg').classList.add('hidden');
+            }
+            document.getElementById('mural-modal').classList.add('hidden');
+        }
+        window.generateAndPrintMural = function() {
+            const startDateVal = document.getElementById('mural-start-date').value;
+            const endDateVal = document.getElementById('mural-end-date').value;
+            const errorMsg = document.getElementById('mural-error-msg');
+            if (!startDateVal || !endDateVal) { errorMsg.innerHTML = '<i class="fa-solid fa-circle-exclamation mr-1"></i> Preencha as datas.'; errorMsg.classList.remove('hidden'); return; }
+            const startDate = new Date(startDateVal + 'T00:00:00').getTime();
+            const endDate = new Date(endDateVal + 'T23:59:59').getTime();
+            if (startDate > endDate) { errorMsg.innerHTML = '<i class="fa-solid fa-circle-exclamation mr-1"></i> Data inicial maior que a final.'; errorMsg.classList.remove('hidden'); return; }
+            errorMsg.classList.add('hidden');
+            closeMuralModal();
+            const formatDate = (dateString) => dateString.split('-').reverse().join('/');
+            
+            let count = 0;
+            const filteredTasks = [];
+            let htmlTable = `<table class="w-full text-left border-collapse border border-slate-300 mb-8"><thead><tr class="bg-slate-200 text-slate-800 uppercase text-xs tracking-wider"><th class="border border-slate-300 p-3 text-center">Cód.</th><th class="border border-slate-300 p-3 w-1/2">Atividade (Montagem Mecânica)</th><th class="border border-slate-300 p-3 text-center">Período</th><th class="border border-slate-300 p-3 text-center bg-slate-100">Previsto</th><th class="border border-slate-300 p-3 text-center bg-blue-50">Realizado</th><th class="border border-slate-300 p-3 text-center">Desvio</th></tr></thead><tbody class="text-sm">`;
+            let sumPlanned = 0, sumActual = 0;
+
+            projectData.forEach(group => {
+                group.tasks.forEach(task => {
+                    if (getTaskType(task, group.type) !== 'Mecânica') return;
+                    const tStart = new Date(task.start + "T00:00:00").getTime();
+                    const tEndStr = task.arrival ? task.arrival : task.end;
+                    const tEnd = new Date(tEndStr + "T23:59:59").getTime();
+
+                    if (tStart <= endDate && tEnd >= startDate) {
+                        count++; filteredTasks.push(task);
+                        const expected = Math.round(getExpectedProgress(task, BASE_DATE));
+                        const actual = task.progress;
+                        const deviation = actual - expected;
+                        sumPlanned += expected; sumActual += actual;
+                        let devColor = deviation === 0 ? 'text-slate-500' : (deviation > 0 ? 'text-emerald-600' : 'text-rose-600');
+                        let devIcon = deviation === 0 ? '=' : (deviation > 0 ? '▲' : '▼');
+                        htmlTable += `<tr class="border-b border-slate-200"><td class="border border-slate-300 p-3 text-xs font-mono text-center text-slate-500">${task.id}</td><td class="border border-slate-300 p-3 font-semibold text-slate-800">${task.name}</td><td class="border border-slate-300 p-3 text-center text-xs text-slate-600">${formatDate(task.start)} a ${formatDate(tEndStr)}</td><td class="border border-slate-300 p-3 text-center font-bold text-slate-700 bg-slate-50">${expected}%</td><td class="border border-slate-300 p-3 text-center font-bold text-blue-700 bg-blue-50/50">${actual}%</td><td class="border border-slate-300 p-3 text-center font-bold ${devColor}">${devIcon} ${Math.abs(deviation)}%</td></tr>`;
+                    }
+                });
+            });
+
+            if (count === 0) htmlTable += `<tr><td colspan="6" class="p-6 text-center text-slate-500">Nenhuma atividade agendada.</td></tr>`;
+            htmlTable += `</tbody></table>`;
+
+            let chartHtml = '';
+            if (filteredTasks.length > 0) {
+                const steps = 5;
+                const timeStep = (endDate - startDate) / steps;
+                const labels = [], dataPlanned = [], dataActual = [], dataDeviation = [];
+
+                for (let i = 0; i <= steps; i++) {
+                    const ts = startDate + (timeStep * i);
+                    const d = new Date(ts);
+                    labels.push(d.toLocaleDateString('pt-BR', {day:'2-digit', month:'2-digit'}));
+                    let p = 0; filteredTasks.forEach(t => p += getExpectedProgress(t, d));
+                    const plannedProg = Math.round(p / filteredTasks.length);
+                    dataPlanned.push(plannedProg);
+                    if (ts <= BASE_DATE.getTime()) {
+                        const projStart = startDate; 
+                        const todayTs = BASE_DATE.getTime();
+                        let ratio = 1;
+                        if(ts < todayTs) ratio = (todayTs - projStart) > 0 ? Math.max(0, (ts - projStart) / (todayTs - projStart)) : 1;
+                        const actualProg = Math.round((sumActual / filteredTasks.length) * ratio);
+                        dataActual.push(actualProg); dataDeviation.push(actualProg - plannedProg);
+                    } else { dataActual.push(null); dataDeviation.push(null); }
+                }
+                
+                const avgDeviation = Math.round(sumActual / count) - Math.round(sumPlanned / count);
+                const offscreenCanvas = document.createElement('canvas');
+                offscreenCanvas.width = 800; offscreenCanvas.height = 250;
+                const ctx = offscreenCanvas.getContext('2d');
+                ctx.fillStyle = 'white'; ctx.fillRect(0, 0, 800, 250);
+                new Chart(ctx, {
+                    type: 'line', data: { labels: labels, datasets: [ { label: 'Previsto (%)', data: dataPlanned, borderColor: '#94a3b8', borderDash: [5, 5], borderWidth: 2, fill: false }, { label: 'Realizado (%)', data: dataActual, borderColor: '#4f46e5', backgroundColor: 'rgba(79, 70, 229, 0.1)', borderWidth: 3, fill: true }, { label: 'Desvio (%)', data: dataDeviation, borderColor: '#ef4444', borderDash: [4, 4], borderWidth: 2, fill: false, pointBackgroundColor: '#ef4444' } ] },
+                    options: { responsive: false, animation: false, devicePixelRatio: 2, scales: { y: { suggestedMin: -20, max: 100 } } }
+                });
+                
+                chartHtml = `
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; page-break-inside: avoid; border: none;"><tr>
+                        <td style="width: 70%; vertical-align: top; padding-right: 20px; border: none;"><h2 class="text-lg font-bold text-slate-800 mb-2 border-b border-slate-200 pb-1">Curva S - Atividades do Período</h2><div class="bg-white border border-slate-200 p-2 rounded-lg" style="width: 100%; text-align: center;"><img src="${offscreenCanvas.toDataURL("image/png")}" style="width: 100%; max-height: 250px; object-fit: contain; display: block;" class="print-safe-image"></div></td>
+                        <td style="width: 30%; vertical-align: top; border: none;"><div class="bg-slate-50 p-4 rounded-xl border border-slate-200"><div style="margin-bottom: 12px;"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Avanço Físico Planejado</p><p class="text-2xl font-bold text-slate-800">${dataPlanned[steps]}%</p></div><div class="border-t border-slate-200 pt-2" style="margin-bottom: 12px;"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Avanço Físico Realizado</p><p class="text-2xl font-bold text-indigo-600">${Math.round(sumActual / count)}%</p></div><div class="border-t border-slate-200 pt-2"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Desvio Atual</p><p class="text-2xl font-bold ${avgDeviation >= 0 ? 'text-emerald-600' : 'text-rose-600'}">${avgDeviation >= 0 ? '▲' : '▼'} ${Math.abs(avgDeviation)}%</p></div></div></td>
+                    </tr></table>`;
+            }
+
+            document.getElementById('print-table-container').innerHTML = `<div class="text-center mb-6 border-b-2 border-slate-800 pb-4"><h1 class="text-2xl font-bold text-slate-900 uppercase tracking-wider">Montagem Consilos/Excel</h1><p class="text-base text-slate-600 mt-1 font-medium">Relatório de Acompanhamento (Mecânica) • Período: ${formatDate(startDateVal)} a ${formatDate(endDateVal)}</p></div>${chartHtml}<h2 class="text-lg font-bold text-slate-800 mb-2 border-b border-slate-200 pb-1 mt-4">Tarefas Selecionadas</h2>${htmlTable}<p class="text-right text-xs text-slate-400 mt-4 italic">Relatório gerado pelo Dashboard em 10/11/2026</p>`;
+            document.body.classList.add('printing-mode');
+            document.body.classList.remove('h-screen', 'overflow-hidden', 'flex', 'flex-col');
+            document.documentElement.classList.remove('h-screen', 'overflow-hidden');
+            document.documentElement.style.height = 'auto'; document.body.style.height = 'auto'; document.body.style.display = 'block'; 
+            document.querySelector('main').classList.add('hidden'); document.querySelector('nav').classList.add('hidden');
+            document.getElementById('print-area').classList.remove('hidden');
+            window.scrollTo(0, 0);
+        }
+        window.closePrintPreview = function() {
+            document.body.classList.remove('printing-mode');
+            document.body.classList.add('h-screen', 'overflow-hidden', 'flex', 'flex-col');
+            document.documentElement.classList.add('h-screen', 'overflow-hidden');
+            document.documentElement.style.height = ''; document.body.style.height = ''; document.body.style.display = '';
+            document.querySelector('main').classList.remove('hidden'); document.querySelector('nav').classList.remove('hidden');
+            document.getElementById('print-area').classList.add('hidden');
+        }
+        window.triggerPrint = function() {
+            const originalTitle = document.title;
+            const startDate = document.getElementById('mural-start-date').value;
+            if(startDate) document.title = "Relatorio_Montagem_" + startDate;
+            try { window.print(); } catch (error) { console.error("Erro ao imprimir", error); }
+            setTimeout(() => { document.title = originalTitle; }, 3000);
+        }
+
+        // --- LÓGICA PRINCIPAL ---
+        window.toggleFilter = function(filterType) {
+            currentFilter = (currentFilter === filterType) ? null : filterType;
+            ['Civil', 'Mecânica', 'Elétrica', 'Automação', 'Pneumática'].forEach(type => {
+                const el = document.getElementById(`card-${type}`);
+                if (!el) return;
+                if (currentFilter) {
+                    if (type === currentFilter) { el.classList.remove('opacity-40', 'scale-95'); el.classList.add('ring-2', 'ring-offset-2', 'scale-100'); }
+                    else { el.classList.add('opacity-40', 'scale-95'); el.classList.remove('ring-2', 'ring-offset-2', 'scale-100'); }
+                } else { el.classList.remove('opacity-40', 'scale-95', 'ring-2', 'ring-offset-2'); el.classList.add('scale-100'); }
+            });
+            renderTasks();
+        }
+
+        function getExpectedProgress(task, dateObj) {
+            if (!task.start) return 0; // Proteção contra atividades sem data de início
+            const current = dateObj.getTime();
+            if (task.arrival) { return current >= new Date(task.arrival + "T23:59:59").getTime() ? 100 : 0; }
+            
+            // Padroniza datas adicionando hora fixa para evitar erro de Timezone (NaN)
+            const start = new Date(task.start + "T00:00:00").getTime();
+            const end = new Date((task.end || task.start) + "T23:59:59").getTime(); 
+            
+            if (isNaN(start) || isNaN(end)) return 0; // Proteção matemática
+            if (current <= start) return 0;
+            if (current >= end) return 100;
+            if (end === start) return 0; 
+            return Math.min(100, Math.max(0, ((current - start) / (end - start)) * 100));
+        }
+
+        function getTaskType(task, parentType) { return task.type || parentType; }
+        window.toggleAccordion = function(contentId, iconId) { document.getElementById(contentId).classList.toggle('open'); document.getElementById(iconId).classList.toggle('rotate-180'); }
+
+        // Função à prova de falhas para calcular o avanço de cada área (Dinâmico)
+        function renderizarAvancoPorArea(dadosDoCronograma) {
+            if (!dadosDoCronograma || !Array.isArray(dadosDoCronograma)) return;
+            const areas = {};
+
+            const limparNumero = (valor) => {
+                if (valor === undefined || valor === null || valor === '') return 0;
+                if (typeof valor === 'number') return valor;
+                const limpo = valor.toString().replace('%', '').replace(',', '.').trim();
+                const numero = parseFloat(limpo);
+                return isNaN(numero) ? 0 : numero;
+            };
+
+            dadosDoCronograma.forEach(atividadeGrupo => {
+                atividadeGrupo.tasks.forEach(atividade => {
+                    let nomeDaArea = getTaskType(atividade, atividadeGrupo.type) || 'Geral';
+                    nomeDaArea = nomeDaArea.toString().trim(); 
+
+                    // Agrupamento para corrigir possíveis erros de digitação no Excel
+                    if(nomeDaArea.toLowerCase().includes('civil')) nomeDaArea = 'Civil';
+                    else if(nomeDaArea.toLowerCase().includes('mecânica') || nomeDaArea.toLowerCase().includes('mecanica')) nomeDaArea = 'Mecânica';
+                    else if(nomeDaArea.toLowerCase().includes('elétrica') || nomeDaArea.toLowerCase().includes('eletrica')) nomeDaArea = 'Elétrica';
+                    else if(nomeDaArea.toLowerCase().includes('automação') || nomeDaArea.toLowerCase().includes('automacao')) nomeDaArea = 'Automação';
+                    else if(nomeDaArea.toLowerCase().includes('pneumática') || nomeDaArea.toLowerCase().includes('pneumatica')) nomeDaArea = 'Pneumática';
+
+                    if (!areas[nomeDaArea]) {
+                        areas[nomeDaArea] = { pesoTotal: 0, avancoRealizado: 0, avancoPrevisto: 0 };
+                    }
+
+                    // Matemática do peso individual de cada tarefa
+                    const peso = limparNumero(atividade.weight || (atividadeGrupo.weight / atividadeGrupo.tasks.length));
+                    const realizado = limparNumero((atividadeGrupo.type === 'Logística') ? atividade.arrivalProgress : atividade.progress);
+                    const previsto = limparNumero(getExpectedProgress(atividade, BASE_DATE));
+
+                    areas[nomeDaArea].pesoTotal += peso;
+                    areas[nomeDaArea].avancoRealizado += (realizado * (peso / 100));
+                    areas[nomeDaArea].avancoPrevisto += (previsto * (peso / 100));
+                });
+            });
+
+            const container = document.getElementById('areas-progress-container');
+            if (!container) return;
+            container.innerHTML = ''; 
+
+            for (const [area, valores] of Object.entries(areas)) {
+                if (valores.pesoTotal <= 0) continue; 
+
+                const percentualReal = (valores.avancoRealizado / (valores.pesoTotal / 100));
+                const percentualPrevisto = (valores.avancoPrevisto / (valores.pesoTotal / 100));
+
+                const cartaoHTML = `
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                        <h3 class="font-bold text-slate-700 text-md mb-3">${area}</h3>
+                        <div class="mb-3">
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="font-semibold text-blue-700">Realizado</span>
+                                <span class="font-bold text-blue-700">${percentualReal.toFixed(1)}%</span>
+                            </div>
+                            <div class="w-full bg-slate-100 rounded-full h-2">
+                                <div class="bg-blue-600 h-2 rounded-full progress-bar-transition" style="width: ${Math.min(percentualReal, 100)}%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-[10px] mb-1 text-slate-500">
+                                <span>Previsto</span>
+                                <span>${percentualPrevisto.toFixed(1)}%</span>
+                            </div>
+                            <div class="w-full bg-slate-100 rounded-full h-1.5">
+                                <div class="bg-slate-400 h-1.5 rounded-full progress-bar-transition" style="width: ${Math.min(percentualPrevisto, 100)}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += cartaoHTML;
+            }
+        }
+
+        function renderTasks() {
+            const container = document.getElementById('task-container');
+            const openAcc = [];
+            document.querySelectorAll('.accordion-content.open').forEach(el => openAcc.push(el.id));
+            container.innerHTML = '';
+
+            projectData.forEach((group, groupIndex) => {
+                const filteredTasks = group.tasks.filter(t => !currentFilter || getTaskType(t, group.type) === currentFilter);
+                if (filteredTasks.length === 0) return;
+
+                let totalProgress = 0;
+                filteredTasks.forEach(t => totalProgress += parseInt(group.type === 'Logística' ? (t.arrivalProgress || 0) : t.progress));
+                let avgProgress = Math.round(totalProgress / filteredTasks.length);
+
+                const groupHTML = `
+                    <div class="group-section relative p-4 md:p-6 border-b border-slate-200 bg-white">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer group" onclick="toggleAccordion('acc-${groupIndex}', 'icon-${groupIndex}')">
+                            <div class="flex items-center gap-4 flex-1">
+                                <div class="w-12 h-12 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 flex items-center justify-center font-bold text-xl shadow-sm shrink-0 transition-colors group-hover:bg-indigo-100">${groupIndex + 1}</div>
+                                <div class="flex-1">
+                                    <h3 class="font-bold text-slate-800 text-lg uppercase tracking-tight group-hover:text-indigo-700 transition-colors">${group.name}</h3>
+                                    <div class="flex items-center gap-3 mt-1.5"><div class="w-full bg-slate-100 rounded-full h-2.5 max-w-md shadow-inner"><div id="group-bar-${groupIndex}" class="bg-indigo-500 h-2.5 rounded-full transition-all duration-500" style="width: ${avgProgress}%"></div></div><span id="group-avg-${groupIndex}" class="text-sm font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md">${avgProgress}%</span></div>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-center w-10 h-10 rounded-full bg-slate-50 text-slate-400 border border-slate-200 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors hidden md:flex shrink-0"><i id="icon-${groupIndex}" class="fa-solid fa-chevron-down transition-transform duration-300"></i></div>
+                        </div>
+                        
+                        <div id="acc-${groupIndex}" class="accordion-content">
+                            <div class="relative ml-6 pl-6 md:ml-6 md:pl-8 border-l-2 border-slate-200 space-y-6 pt-4 pb-2">
+                                ${filteredTasks.map((task, taskIndex) => {
+                                    const tType = getTaskType(task, group.type);
+                                    const expected = Math.round(getExpectedProgress(task, BASE_DATE));
+                                    const prog = group.type === 'Logística' ? (task.arrivalProgress || 0) : task.progress;
+                                    const isDelayed = (expected > 0 && prog < expected);
+                                    let hasInterference = task.arrival && (task.arrivalProgress || 0) < 100 && new Date(task.arrival).getTime() > new Date(task.start).getTime();
+                                    
+                                    let badgeColor = "bg-slate-100 text-slate-600 border-slate-200";
+                                    if(tType === "Civil") badgeColor = "bg-emerald-50 text-emerald-700 border-emerald-200";
+                                    if(tType === "Mecânica") badgeColor = "bg-blue-50 text-blue-700 border-blue-200";
+                                    if(tType === "Elétrica") badgeColor = "bg-yellow-50 text-yellow-800 border-yellow-200";
+                                    if(tType === "Automação") badgeColor = "bg-purple-50 text-purple-700 border-purple-200";
+                                    if(tType === "Pneumática") badgeColor = "bg-cyan-50 text-cyan-700 border-cyan-200";
+                                    if(tType === "Logística") badgeColor = "bg-slate-700 text-white border-slate-800";
+
+                                    const photoCount = taskPhotos[task.id] ? taskPhotos[task.id].length : 0;
+                                    const photoBadge = photoCount > 0 ? `<span class="absolute -top-2 -right-2 bg-indigo-500 text-white text-[10px] font-bold h-4 w-4 rounded-full flex items-center justify-center shadow-sm border border-white">${photoCount}</span>` : '';
+                                    const workersCount = task.workers || 0;
+
+                                    let controlHTML = isLoggedIn ? `
+                                        <button onclick="openPhotoModal('${task.id}', '${task.name.replace(/'/g, "\\'")}')" class="relative bg-white hover:bg-slate-100 text-slate-500 hover:text-indigo-600 p-2.5 rounded-lg transition-colors border border-slate-200 shadow-sm mr-2 shrink-0" title="Imagens"><i class="fa-solid fa-image"></i>${photoBadge}</button>
+                                        <div class="flex flex-col items-center border-r border-slate-200 pr-3 mr-3 shrink-0" title="Efetivo">
+                                            <span class="text-[9px] uppercase font-bold text-orange-500 mb-1"><i class="fa-solid fa-users"></i> Efetivo</span>
+                                            <input type="number" min="0" value="${workersCount}" class="w-12 h-6 text-xs font-bold border border-slate-300 rounded text-center focus:ring-1 focus:ring-orange-500" onchange="updateWorkers(${groupIndex}, ${taskIndex}, this.value)">
+                                        </div>
+                                        <input type="range" min="0" max="100" value="${prog}" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" onchange="updateProgress(${groupIndex}, ${taskIndex}, this.value, '${group.type}')" oninput="updateProgress(${groupIndex}, ${taskIndex}, this.value, '${group.type}')">
+                                        <span id="val-${groupIndex}-${taskIndex}" class="text-sm font-bold text-slate-700 w-10 text-right shrink-0">${prog}%</span>
+                                    ` : `
+                                        <button onclick="openPhotoModal('${task.id}', '${task.name.replace(/'/g, "\\'")}')" class="relative bg-white hover:bg-slate-100 text-slate-500 hover:text-indigo-600 p-2.5 rounded-lg transition-colors border border-slate-200 shadow-sm mr-2 shrink-0" title="Imagens"><i class="fa-solid fa-image"></i>${photoBadge}</button>
+                                        <div class="flex flex-col items-center border-r border-slate-200 pr-3 mr-3 shrink-0" title="Efetivo">
+                                            <span class="text-[9px] uppercase font-bold text-orange-500 mb-0.5"><i class="fa-solid fa-users"></i> Efetivo</span>
+                                            <span class="text-sm font-bold text-slate-700">${workersCount}</span>
+                                        </div>
+                                        <div class="w-full bg-slate-200 rounded-full h-2 min-w-[80px]"><div class="bg-blue-500 h-2 rounded-full" style="width: ${prog}%"></div></div>
+                                        <span class="text-sm font-bold text-slate-700 w-12 text-right shrink-0"><i class="fa-solid fa-lock text-xs text-slate-400 mr-1"></i>${prog}%</span>
+                                    `;
+
+                                    let dotColor = prog === 100 ? 'bg-emerald-500' : (prog > 0 ? 'bg-blue-500' : 'bg-slate-200');
+
+                                    return `
+                                    <div class="relative group" onclick="event.stopPropagation()">
+                                        <div class="absolute w-4 h-4 rounded-full ${dotColor} border-[3px] border-slate-300 -left-[33px] md:-left-[41px] top-4 shadow-sm z-10 transition-colors duration-300" id="dot-${groupIndex}-${taskIndex}"></div>
+                                        <div class="flex flex-col xl:flex-row xl:items-center justify-between p-4 rounded-xl border ${(isDelayed || hasInterference) ? 'bg-rose-50/40 border-rose-200' : 'bg-slate-50 border-slate-200 hover:border-blue-200 hover:shadow-md'} gap-4 transition shadow-sm">
+                                            <div class="flex-1 flex items-start gap-3 min-w-0">
+                                                <div class="flex-1 min-w-0">
+                                                    <div class="flex flex-wrap items-center gap-2 mb-1.5">
+                                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded border uppercase ${badgeColor}">${tType}</span>
+                                                        ${isDelayed ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-100 text-rose-700 uppercase border border-rose-200"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Atrasada</span>` : ''}
+                                                        ${hasInterference ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-orange-100 text-orange-700 uppercase border border-orange-200"><i class="fa-solid fa-link-slash mr-1"></i>Interferência Logística</span>` : ''}
+                                                    </div>
+                                                    <p class="text-sm font-bold text-slate-800 truncate" title="${task.name}">${task.name}</p>
+                                                    <div class="text-[11px] text-slate-500 mt-1.5 flex flex-wrap items-center gap-2 bg-white inline-flex px-2 py-1 rounded border border-slate-100">
+                                                        <span class="text-indigo-600 font-semibold"><i class="fa-regular fa-circle-play mr-1"></i> ${task.start.split('-').reverse().join('/')}</span>
+                                                        <i class="fa-solid fa-arrow-right text-slate-300 text-[10px]"></i>
+                                                        <span class="text-emerald-600 font-semibold"><i class="fa-regular fa-circle-check mr-1"></i> ${task.end ? task.end.split('-').reverse().join('/') : task.arrival.split('-').reverse().join('/')}</span>
+                                                        <span class="text-slate-300 mx-1 hidden sm:inline">|</span>
+                                                        <span class="hidden sm:inline">Progresso ideal hoje: <strong>${expected}%</strong></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="w-full xl:w-1/3 flex items-center gap-3 bg-white p-3 rounded-lg border border-slate-100 shadow-sm shrink-0">${controlHTML}</div>
+                                        </div>
+                                    </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += groupHTML;
+            });
+
+            openAcc.forEach(id => { const el = document.getElementById(id); if (el) { el.classList.add('open'); document.getElementById(id.replace('acc-', 'icon-')).classList.add('rotate-180'); }});
+            updateDashboards();
+            updateAlerts(); 
+            saveToLocal(); 
+        }
+
+        window.updateProgress = function(gIdx, tIdx, val, type) {
+            const valInt = parseInt(val);
+            if (type === 'Logística') projectData[gIdx].tasks[tIdx].arrivalProgress = valInt;
+            else projectData[gIdx].tasks[tIdx].progress = valInt;
+            
+            document.getElementById(`val-${gIdx}-${tIdx}`).innerText = `${val}%`;
+            
+            const dot = document.getElementById(`dot-${gIdx}-${tIdx}`);
+            if(dot) {
+                if (valInt == 100) dot.className = "absolute w-4 h-4 rounded-full bg-emerald-500 border-2 border-white -left-[33px] md:-left-[41px] top-4 shadow-sm z-10 transition-colors duration-300";
+                else if (valInt > 0) dot.className = "absolute w-4 h-4 rounded-full bg-blue-500 border-2 border-white -left-[33px] md:-left-[41px] top-4 shadow-sm z-10 transition-colors duration-300";
+                else dot.className = "absolute w-4 h-4 rounded-full bg-slate-200 border-2 border-white -left-[33px] md:-left-[41px] top-4 shadow-sm z-10 transition-colors duration-300";
+            }
+            updateDashboards();
+            saveToLocal();
+        }
+
+        window.updateWorkers = function(gIdx, tIdx, val) {
+            projectData[gIdx].tasks[tIdx].workers = parseInt(val) || 0;
+            updateDashboards(); 
+            saveToLocal();
+        }
+
+        function updateDashboards() {
+            let totals = { Civil: {v:0, c:0}, Mecânica: {v:0, c:0}, Elétrica: {v:0, c:0}, Automação: {v:0, c:0}, Pneumática: {v:0, c:0} };
+            let weightedGlobal = 0, weightedPlanned = 0, totalWorkersGlobal = 0;
+
+            projectData.forEach(group => {
+                let groupProgress = 0, groupPlanned = 0;
+                group.tasks.forEach(task => {
+                    let tTypeRaw = getTaskType(task, group.type) || '';
+                    let tTypeStr = tTypeRaw.toString().toLowerCase().trim();
+                    
+                    // Padroniza nomes vindos do Excel para não zerar as áreas
+                    let tType = tTypeRaw;
+                    if(tTypeStr.includes('civil')) tType = 'Civil';
+                    else if(tTypeStr.includes('mecânica') || tTypeStr.includes('mecanica')) tType = 'Mecânica';
+                    else if(tTypeStr.includes('elétrica') || tTypeStr.includes('eletrica')) tType = 'Elétrica';
+                    else if(tTypeStr.includes('automação') || tTypeStr.includes('automacao')) tType = 'Automação';
+                    else if(tTypeStr.includes('pneumática') || tTypeStr.includes('pneumatica')) tType = 'Pneumática';
+
+                    const tProg = (tType === 'Logística') ? (task.arrivalProgress || 0) : (task.progress || 0);
+                    
+                    if(totals[tType]) { totals[tType].v += tProg; totals[tType].c++; }
+                    
+                    groupProgress += tProg;
+                    groupPlanned += getExpectedProgress(task, BASE_DATE);
+                    totalWorkersGlobal += (task.workers || 0); 
+                });
+                
+                let groupAvg = group.tasks.length > 0 ? (groupProgress / group.tasks.length) : 0;
+                let groupPlannedAvg = group.tasks.length > 0 ? (groupPlanned / group.tasks.length) : 0;
+                let gWeight = parseFloat(group.weight) || 0;
+                
+                weightedGlobal += (groupAvg * (gWeight / 100));
+                weightedPlanned += (groupPlannedAvg * (gWeight / 100));
+            });
+
+            const updateCard = (type, key) => {
+                if(!totals[type]) return;
+                const perc = totals[type].c > 0 ? Math.round(totals[type].v / totals[type].c) : 0;
+                const elPercent = document.getElementById(`${key}-percent`);
+                const elBar = document.getElementById(`${key}-progress-bar`);
+                if(elPercent && elBar) {
+                    elPercent.innerText = `${perc}%`;
+                    elBar.style.width = `${perc}%`;
+                }
+            }
+            
+            // Corrige o mapeamento de nomes para os gráficos pequenos
+            const keyMap = { 'Civil': 'civil', 'Mecânica': 'mec', 'Elétrica': 'ele', 'Automação': 'aut', 'Pneumática': 'pneu' };
+            ['Civil', 'Mecânica', 'Elétrica', 'Automação', 'Pneumática'].forEach(t => {
+                updateCard(t, keyMap[t]);
+            });
+
+            const globalPerc = Math.round(weightedGlobal) || 0;
+            const plannedPerc = Math.round(weightedPlanned) || 0;
+            const deviation = globalPerc - plannedPerc;
+
+            document.getElementById('global-percent').innerText = `${globalPerc}%`;
+            document.getElementById('global-progress-bar').style.width = `${globalPerc}%`;
+            document.getElementById('planned-progress').innerText = `${plannedPerc}%`;
+            document.getElementById('actual-progress-kpi').innerText = `${globalPerc}%`;
+            
+            const execStatus = document.getElementById('executive-status');
+            execStatus.classList.remove('hidden');
+            if (deviation === 0) {
+                execStatus.className = "hidden md:flex text-[10px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider shadow-sm bg-slate-100 text-slate-600 border border-slate-200";
+                execStatus.innerHTML = "<i class='fa-solid fa-check mr-1'></i> No Prazo";
+            } else if (deviation > 0) {
+                execStatus.className = "hidden md:flex text-[10px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider shadow-sm bg-emerald-100 text-emerald-700 border border-emerald-300";
+                execStatus.innerHTML = "<i class='fa-solid fa-arrow-trend-up mr-1'></i> Adiantado";
+            } else {
+                execStatus.className = "hidden md:flex text-[10px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider shadow-sm bg-rose-100 text-rose-700 border border-rose-300";
+                execStatus.innerHTML = "<i class='fa-solid fa-triangle-exclamation mr-1'></i> Em Atraso";
+            }
+
+            document.getElementById('deviation-value').innerText = `${Math.abs(deviation)}%`;
+            const devContainer = document.getElementById('deviation-container');
+            const devValueText = document.getElementById('deviation-value-text');
+            const devIcon = document.getElementById('deviation-icon');
+            const devLabel = document.getElementById('deviation-label');
+
+            if (deviation >= 0) {
+                devContainer.className = "executive-kpi-card cursor-pointer deviation-positive";
+                devLabel.className = "executive-kpi-label";
+                devValueText.className = "executive-kpi-value deviation-positive flex items-center gap-2";
+                devIcon.className = "fa-solid fa-arrow-trend-up";
+            } else {
+                devContainer.className = "executive-kpi-card cursor-pointer deviation-negative";
+                devLabel.className = "executive-kpi-label";
+                devValueText.className = "executive-kpi-value deviation-negative flex items-center gap-2";
+                devIcon.className = "fa-solid fa-arrow-trend-down";
+            }
+
+            document.getElementById('total-workers').innerText = totalWorkersGlobal;
+            document.getElementById('total-workers-nav').innerText = totalWorkersGlobal;
+
+            updateChart(globalPerc);
+            renderizarAvancoPorArea(projectData); // <- Atualiza os cartões dinâmicos sempre que houver mudança!
+        }
+
+        window.toggleAuthModal = function() {
+            if (currentFirebaseUser) {
+                window.firebaseSignOut().catch(error => {
+                    console.error("Erro ao sair da conta:", error);
+                    window.setSyncStatus("Falha ao sair da conta", "error");
+                });
+                return;
+            }
+            document.getElementById('modal-bg').classList.remove('hidden');
+            document.getElementById('login-modal').classList.remove('hidden');
+        }
+
+        window.closeAuthModal = function() {
+            document.getElementById('login-modal').classList.add('hidden');
+            document.getElementById('modal-bg').classList.add('hidden');
+        }
+
+        window.onFirebaseAuthChanged = async function(user) {
+            if (!dashboardInitialized) {
+                pendingFirebaseUser = user;
+                authStateReceived = true;
+                return;
+            }
+            const authButton = document.getElementById('auth-btn');
+            if (user) {
+                currentFirebaseUser = user;
+                isLoggedIn = false;
+                document.getElementById('modal-bg').classList.add('hidden');
+                document.getElementById('login-modal').classList.add('hidden');
+                document.getElementById('auth-password').value = '';
+                authButton.innerHTML = `<i class="fa-solid fa-user-check text-emerald-400"></i> <span class="hidden md:inline">Sair</span>`;
+                authButton.className = "flex items-center gap-2 bg-slate-800 border border-slate-700 hover:bg-slate-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-md";
+                window.setSyncStatus("Conectando ao Firestore...", "loading");
+                document.getElementById('edit-badge').classList.add('hidden');
+                document.getElementById('notify-btn').classList.add('hidden');
+                document.getElementById('notify-btn').classList.remove('flex');
+                document.getElementById('manage-btn').classList.add('hidden');
+                document.getElementById('manage-btn').classList.remove('flex');
+                renderTasks();
+                await window.startFirestoreSync(projectData);
+            } else {
+                currentFirebaseUser = null;
+                isLoggedIn = false;
+                window.stopFirestoreSync();
+                authButton.innerHTML = `<i class="fa-solid fa-lock text-slate-300"></i> <span class="hidden md:inline">Acesso Restrito</span>`;
+                authButton.className = "flex items-center gap-2 bg-slate-800 border border-slate-700 hover:bg-slate-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-md";
+                document.getElementById('edit-badge').classList.add('hidden');
+                document.getElementById('notify-btn').classList.add('hidden');
+                document.getElementById('notify-btn').classList.remove('flex');
+                document.getElementById('manage-btn').classList.add('hidden');
+                document.getElementById('manage-btn').classList.remove('flex');
+                window.setSyncStatus("Aguardando autenticação", "loading");
+                renderTasks();
+            }
+        }
+
+        window.onFirestoreReady = function() {
+            if (!currentFirebaseUser || isLoggedIn) return;
+            isLoggedIn = true;
+            const authButton = document.getElementById('auth-btn');
+            authButton.innerHTML = `<i class="fa-solid fa-unlock text-emerald-400"></i> <span class="hidden md:inline">Sair</span>`;
+            authButton.className = "flex items-center gap-2 bg-emerald-700 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-md border border-emerald-600";
+            document.getElementById('edit-badge').classList.remove('hidden');
+            document.getElementById('notify-btn').classList.remove('hidden');
+            document.getElementById('notify-btn').classList.add('flex');
+            document.getElementById('manage-btn').classList.remove('hidden');
+            document.getElementById('manage-btn').classList.add('flex');
+            renderTasks();
+        }
+
+        window.handleLogin = async function() {
+            const email = document.getElementById('auth-email').value.trim();
+            const password = document.getElementById('auth-password').value;
+            const errorEl = document.getElementById('login-error-msg');
+            errorEl.classList.add('hidden');
+            if (!email || !password) {
+                errorEl.innerText = "Informe o e-mail e a senha.";
+                errorEl.classList.remove('hidden');
+                return;
+            }
+            try {
+                await window.firebaseSignIn(email, password);
+            } catch (error) {
+                console.error("Falha na autenticação:", error);
+                errorEl.innerText = error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password'
+                    ? "E-mail ou senha inválidos."
+                    : "Não foi possível entrar. Verifique a conexão e tente novamente.";
+                errorEl.classList.remove('hidden');
+            }
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('sCurveChart').getContext('2d');
+            sCurveChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Set/26', 'Out/26', 'Nov/26', 'Dez/26', 'Jan/27', 'Fev/27'],
+                    datasets: [
+                        { label: 'Previsto (%)', data: [0, 8, 20, 55, 82, 100], borderColor: '#94a3b8', borderDash: [5, 5], borderWidth: 2, fill: false },
+                        { label: 'Realizado (%)', data: [0, 8, null, null, null, null], borderColor: '#4f46e5', backgroundColor: 'rgba(79, 70, 229, 0.1)', borderWidth: 3, fill: true },
+                        { label: 'Desvio (%)', data: [0, 0, null, null, null, null], borderColor: '#ef4444', borderDash: [4, 4], borderWidth: 2, fill: false }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+
+        function updateChart(currentGlobal) {
+            if(!sCurveChart) return;
+            sCurveChart.data.datasets[1].data[2] = currentGlobal; 
+            sCurveChart.data.datasets[2].data[2] = currentGlobal - 20;
+            sCurveChart.update('none'); 
+        }
+
+        window.switchTab = function(tabName) {
+            ['radar', 'logistics', 'deps', 'dateFilter'].forEach(t => {
+                document.getElementById(`tab-content-${t}`).classList.add('hidden');
+                document.getElementById(`tab-content-${t}`).classList.remove('flex', 'block');
+                const btn = document.getElementById(`tab-btn-${t}`);
+                btn.classList.remove('text-emerald-700', 'border-emerald-700');
+                btn.classList.add('text-slate-500', 'border-transparent');
+            });
+            const activeContent = document.getElementById(`tab-content-${tabName}`);
+            activeContent.classList.remove('hidden');
+            if(tabName === 'dateFilter') activeContent.classList.add('flex');
+            else activeContent.classList.add('block');
+            
+            const activeBtn = document.getElementById(`tab-btn-${tabName}`);
+            activeBtn.classList.remove('text-slate-500', 'border-transparent');
+            activeBtn.classList.add('text-emerald-700', 'border-emerald-700');
+            
+            if (tabName === 'deps') renderDependenciesTab();
+        }
+
+        function updateAlerts() {
+            const radarContainer = document.getElementById('tab-content-radar');
+            const logisticsContainer = document.getElementById('tab-content-logistics');
+            radarContainer.innerHTML = '';
+            logisticsContainer.innerHTML = '';
+            let radarAlertCount = 0;
+            let logInterferenceCount = 0;
+            const formatDate = (dateString) => dateString.split('-').reverse().join('/');
+
+            let allLogisticsHTML = '';
+            let logisticsItems = [];
+
+            projectData.forEach(group => {
+                group.tasks.forEach(task => {
+                    const expected = Math.round(getExpectedProgress(task, BASE_DATE));
+                    if (group.type !== 'Logística') {
+                        if (expected > 0 && task.progress < expected) {
+                            radarAlertCount++;
+                            radarContainer.innerHTML += `
+                                <div class="p-2.5 rounded bg-rose-50 border border-rose-100 shadow-sm mb-2">
+                                    <span class="text-[10px] font-bold text-rose-600 uppercase mb-0.5 block"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Atrasada</span>
+                                    <span class="text-xs text-slate-800 font-bold block">${task.name}</span>
+                                    <div class="text-[10px] mt-1 text-slate-600 font-medium">Realizado: ${task.progress}% | Previsto: ${expected}%</div>
+                                </div>`;
+                        } else if (task.progress < 100 && new Date(task.start) <= BASE_DATE) {
+                            radarContainer.innerHTML += `
+                                <div class="p-2.5 rounded bg-indigo-50 border border-indigo-100 shadow-sm mb-2">
+                                    <span class="text-[10px] font-bold text-indigo-600 uppercase mb-0.5 block"><i class="fa-solid fa-clock mr-1"></i> Em andamento</span>
+                                    <span class="text-xs text-slate-800 font-bold block">${task.name}</span>
+                                    <div class="text-[10px] mt-1 text-slate-600 font-medium">Progresso Atual: ${task.progress}%</div>
+                                </div>`;
+                        }
+                    } else {
+                        logisticsItems.push(task);
+                    }
+                });
+            });
+
+            logisticsItems.sort((a, b) => new Date(a.arrival) - new Date(b.arrival));
+            logisticsItems.forEach(task => {
+                const arrProg = task.arrivalProgress || 0;
+                const isArrived = arrProg === 100;
+                const hasInterference = new Date(task.arrival).getTime() > new Date(task.start).getTime() && !isArrived;
+                
+                if (hasInterference) logInterferenceCount++;
+
+                let cardClasses = isArrived ? "bg-emerald-50 border-emerald-200" : (hasInterference ? "bg-orange-50 border-orange-300" : "bg-slate-50 border-slate-200");
+                let headerLabel = isArrived ? `<span class="text-[10px] font-bold text-emerald-700 block uppercase mb-0.5"><i class="fa-solid fa-check-double mr-1"></i>Recebido</span>` : (hasInterference ? `<span class="text-[10px] font-bold text-orange-700 block uppercase mb-0.5"><i class="fa-solid fa-link-slash mr-1"></i>Atrasando Montagem</span>` : `<span class="text-[10px] font-bold text-slate-500 block uppercase mb-0.5"><i class="fa-regular fa-clock mr-1"></i>Programado</span>`);
+
+                logisticsContainer.innerHTML += `
+                    <div class="p-2.5 rounded border shadow-sm mb-2 transition-all ${cardClasses}">
+                        <div class="flex items-start justify-between mb-1.5 gap-2">
+                            <div class="flex-1">${headerLabel}<span class="text-xs text-slate-800 font-bold block">${task.name.replace(/^\d+\.\d+\.\d+\s/, '')}</span></div>
+                            <span class="text-xs font-bold ${isArrived ? 'text-emerald-600' : 'text-slate-600'} bg-white px-2 py-1 rounded border">${arrProg}%</span>
+                        </div>
+                        <div class="text-[10px] text-slate-600 font-medium mt-1 pt-1.5 flex justify-between border-t border-black/5">
+                            <span>Req: ${formatDate(task.start)}</span>
+                            <span class="${hasInterference ? 'text-rose-600 font-bold' : 'text-blue-600 font-bold'}">Prev: ${formatDate(task.arrival)}</span>
+                        </div>
+                    </div>`;
+            });
+
+            if(radarContainer.innerHTML === '') radarContainer.innerHTML = '<div class="p-4 text-center text-sm font-medium text-emerald-600"><i class="fa-solid fa-check-circle text-xl block mb-2 opacity-50"></i>Tudo em dia!</div>';
+            if(logisticsContainer.innerHTML === '') logisticsContainer.innerHTML = '<div class="p-4 text-center text-sm font-medium text-slate-500">Nenhum equipamento logístico.</div>';
+
+            const badgeRadar = document.getElementById('badge-tab-radar');
+            const badgeLog = document.getElementById('badge-tab-logistics');
+            
+            if (radarAlertCount > 0) { badgeRadar.innerText = radarAlertCount; badgeRadar.classList.remove('hidden'); } else badgeRadar.classList.add('hidden');
+            if (logInterferenceCount > 0) { badgeLog.innerText = logInterferenceCount; badgeLog.classList.remove('hidden'); } else badgeLog.classList.add('hidden');
+        }
+
+        function renderDependenciesTab() {
+            const depsContainer = document.getElementById('tab-content-deps');
+            depsContainer.innerHTML = '';
+            projectData.forEach(group => {
+                if (group.type === 'Logística') return;
+                let html = `<div class="bg-white border border-slate-200 rounded-lg p-3 mb-3 shadow-sm"><h4 class="font-bold text-xs text-slate-700 mb-3 uppercase">${group.name}</h4><div class="space-y-3 pl-5 border-l-2 border-slate-200 relative ml-2">`;
+                group.tasks.forEach(task => {
+                    const depsText = task.deps && task.deps.length > 0 ? `Depende de: <span class="font-semibold">${task.deps.join(', ')}</span>` : 'Ponto de Início';
+                    html += `
+                        <div class="relative">
+                            <div class="absolute w-2.5 h-2.5 ${task.deps && task.deps.length === 0 ? 'bg-indigo-500' : 'bg-slate-300'} rounded-full -left-[27px] top-1 ring-4 ring-white"></div>
+                            <p class="text-xs font-bold ${task.progress === 100 ? 'text-emerald-600 line-through opacity-60' : 'text-slate-800'}">${task.name}</p>
+                            <p class="text-[10px] text-slate-500 mt-0.5"><i class="fa-solid fa-link text-slate-400 mr-1"></i> ${depsText}</p>
+                        </div>`;
+                });
+                html += `</div></div>`;
+                depsContainer.innerHTML += html;
+            });
+        }
+
+        window.applyDateFilter = function() {
+            const startDateVal = document.getElementById('filter-start-date').value;
+            const endDateVal = document.getElementById('filter-end-date').value;
+            const resultsContainer = document.getElementById('date-filter-results');
+
+            if (!startDateVal || !endDateVal) { resultsContainer.innerHTML = '<div class="text-center py-4 text-slate-400 text-xs font-medium">Preencha ambas as datas.</div>'; return; }
+            const startFilter = new Date(startDateVal + "T00:00:00").getTime();
+            const endFilter = new Date(endDateVal + "T23:59:59").getTime();
+            if (startFilter > endFilter) { resultsContainer.innerHTML = '<div class="text-center py-4 text-rose-500 text-xs font-medium">Data início > Data fim.</div>'; return; }
+
+            let html = ''; let count = 0;
+            const formatDate = (dateString) => dateString.split('-').reverse().join('/');
+
+            projectData.forEach(group => {
+                group.tasks.forEach(task => {
+                    const taskStart = new Date(task.start + "T00:00:00").getTime();
+                    const taskEndStr = task.arrival ? task.arrival : task.end; 
+                    const taskEnd = new Date(taskEndStr + "T23:59:59").getTime();
+                    
+                    if ((taskStart >= startFilter && taskStart <= endFilter) || (taskEnd >= startFilter && taskEnd <= endFilter) || (taskStart <= startFilter && taskEnd >= endFilter)) {
+                        count++;
+                        const tType = getTaskType(task, group.type);
+                        let badgeColor = tType === "Civil" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : (tType === "Mecânica" ? "bg-blue-50 text-blue-700 border-blue-200" : (tType === "Elétrica" ? "bg-yellow-50 text-yellow-800 border-yellow-200" : (tType === "Automação" ? "bg-purple-50 text-purple-700 border-purple-200" : (tType === "Pneumática" ? "bg-cyan-50 text-cyan-700 border-cyan-200" : "bg-slate-700 text-white border-slate-800"))));
+                        const prog = (group.type === 'Logística') ? (task.arrivalProgress || 0) : task.progress;
+
+                        html += `
+                            <div class="flex flex-col p-2.5 rounded bg-white border border-slate-200 shadow-sm">
+                                <div class="flex items-start justify-between mb-1.5 gap-2">
+                                    <div class="flex-1"><div class="flex flex-wrap gap-1 mb-1.5"><span class="text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase ${badgeColor}">${tType}</span><span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">${group.name}</span></div><span class="text-xs text-slate-800 font-bold block leading-tight">${task.name}</span></div>
+                                    <div class="text-right shrink-0"><span class="text-[10px] font-bold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">${prog}%</span></div>
+                                </div>
+                                <div class="text-[10px] text-slate-500 font-medium flex items-center gap-1.5 mt-1 border-t border-slate-100 pt-1.5"><i class="fa-regular fa-calendar text-slate-400"></i> ${formatDate(task.start)} a ${formatDate(taskEndStr)}</div>
+                            </div>`;
+                    }
+                });
+            });
+            resultsContainer.innerHTML = count === 0 ? '<div class="text-center py-4 text-slate-400 text-xs font-medium">Nenhuma atividade neste período.</div>' : `<div class="text-[10px] font-bold text-indigo-600 mb-2 uppercase text-center bg-indigo-50 border border-indigo-100 py-1.5 rounded shadow-sm">${count} atividade(s) encontrada(s)</div>` + html;
+        }
+
+        // Init
+        window.onload = async () => {
+            const localData = localStorage.getItem('secadorDashboardFullData');
+            if (localData) {
+                try { projectData = JSON.parse(localData); } catch(e) { console.error("Erro no cache local"); }
+            }
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const stateFromUrl = urlParams.get('s');
+            if (stateFromUrl) {
+                applyStateString(stateFromUrl);
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+            
+            initChart();
+            renderTasks(); 
+            switchTab('radar');
+            dashboardInitialized = true;
+            if (authStateReceived) await window.onFirebaseAuthChanged(pendingFirebaseUser);
+        };
+    </script>
+    <script type="module" src="/firebase.js"></script>
+</body>
+</html>
