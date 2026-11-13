@@ -1495,7 +1495,7 @@
         }
 
         function updateDashboards() {
-            let totals = { Civil: {v:0, c:0}, Mecânica: {v:0, c:0}, Elétrica: {v:0, c:0}, Automação: {v:0, c:0}, Pneumática: {v:0, c:0} };
+            let totals = { Civil: {v:0, w:0}, Mecânica: {v:0, w:0}, Elétrica: {v:0, w:0}, Automação: {v:0, w:0}, Pneumática: {v:0, w:0} };
             let weightedGlobal = 0, weightedPlanned = 0, totalWorkersGlobal = 0;
 
             projectData.forEach(group => {
@@ -1512,9 +1512,9 @@
                     else if(tTypeStr.includes('automação') || tTypeStr.includes('automacao')) tType = 'Automação';
                     else if(tTypeStr.includes('pneumática') || tTypeStr.includes('pneumatica')) tType = 'Pneumática';
 
-                    const tProg = (tType === 'Logística') ? (task.arrivalProgress || 0) : (task.progress || 0);
+                    const rawProgress = (tType === 'Logística') ? task.arrivalProgress : task.progress; const tProg = parseFloat((rawProgress || 0).toString().replace('%', '').replace(',', '.')) || 0;
                     
-                    if(totals[tType]) { totals[tType].v += tProg; totals[tType].c++; }
+                    if (totals[tType]) { const rawWeight = parseFloat((task.weight || 0).toString().replace('%', '').replace(',', '.')) || 0; const taskWeight = rawWeight || (parseFloat(group.weight) || 0) / group.tasks.length; totals[tType].v += tProg * taskWeight; totals[tType].w += taskWeight; }
                     
                     groupProgress += tProg;
                     groupPlanned += getExpectedProgress(task, BASE_DATE);
@@ -1531,12 +1531,12 @@
 
             const updateCard = (type, key) => {
                 if(!totals[type]) return;
-                const perc = totals[type].c > 0 ? Math.round(totals[type].v / totals[type].c) : 0;
+                const perc = totals[type].w > 0 ? totals[type].v / totals[type].w : 0;
                 const elPercent = document.getElementById(`${key}-percent`);
                 const elBar = document.getElementById(`${key}-progress-bar`);
                 if(elPercent && elBar) {
-                    elPercent.innerText = `${perc}%`;
-                    elBar.style.width = `${perc}%`;
+                    elPercent.innerText = `${perc.toFixed(1)}%`;
+                    elBar.style.width = `${Math.max(0, Math.min(perc, 100))}%`;
                 }
             }
             
