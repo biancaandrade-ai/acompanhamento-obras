@@ -23,6 +23,7 @@ const firebaseConfig = {
   appId: "1:507503560478:web:a337219e219c8b2b2feb0f",
 };
 
+const EDITOR_EMAIL = "bianca.andrade@attosementes.com.br";
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -33,6 +34,10 @@ let lastRemoteData = null;
 let saveTimer = null;
 let saveRevision = 0;
 let localSavePending = false;
+
+function isEditor() {
+  return auth.currentUser && auth.currentUser.email === EDITOR_EMAIL;
+}
 
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
@@ -82,12 +87,12 @@ function setSyncStatus(message, state) {
 }
 
 function reportSyncError(error) {
-  console.error("Erro de sincronização com o Firestore:", error);
-  setSyncStatus("Falha na sincronização", "error");
+  console.error("Erro de sincronizaÃ§Ã£o com o Firestore:", error);
+  setSyncStatus("Falha na sincronizaÃ§Ã£o", "error");
 }
 
 async function saveProjectData(revision) {
-  if (!auth.currentUser || !unsubscribeProject) return;
+  if (!isEditor() || !unsubscribeProject) return;
   const localData = clone(window.getProjectData());
   if (lastRemoteData && JSON.stringify(localData) === JSON.stringify(lastRemoteData)) {
     if (revision === saveRevision) localSavePending = false;
@@ -98,7 +103,7 @@ async function saveProjectData(revision) {
 
   await runTransaction(db, async transaction => {
     const snapshot = await transaction.get(projectRef);
-    if (!snapshot.exists()) throw new Error("O documento do projeto não existe no Firestore.");
+    if (!snapshot.exists()) throw new Error("O documento do projeto nÃ£o existe no Firestore.");
     const remoteData = snapshot.data().projectData;
     savedData = mergeProjectData(baseData, localData, remoteData);
     transaction.set(projectRef, {
@@ -115,7 +120,7 @@ async function saveProjectData(revision) {
 }
 
 window.queueFirestoreSave = function() {
-  if (!auth.currentUser || !unsubscribeProject) return;
+  if (!isEditor() || !unsubscribeProject) return;
   saveRevision++;
   const revision = saveRevision;
   localSavePending = true;
@@ -127,28 +132,30 @@ window.queueFirestoreSave = function() {
 };
 
 window.startFirestoreSync = async function(initialData) {
-  if (!auth.currentUser || unsubscribeProject) return;
+  if (unsubscribeProject) return;
   setSyncStatus("Conectando ao Firestore...", "loading");
 
   try {
-    await runTransaction(db, async transaction => {
-      const snapshot = await transaction.get(projectRef);
-      if (!snapshot.exists()) {
-        transaction.set(projectRef, {
-          projectData: initialData,
-          updatedAt: serverTimestamp(),
-        });
-      }
-    });
+    if (isEditor()) {
+      await runTransaction(db, async transaction => {
+        const snapshot = await transaction.get(projectRef);
+        if (!snapshot.exists()) {
+          transaction.set(projectRef, {
+            projectData: initialData,
+            updatedAt: serverTimestamp(),
+          });
+        }
+      });
+    }
 
     unsubscribeProject = onSnapshot(projectRef, snapshot => {
       if (!snapshot.exists()) {
-        setSyncStatus("Projeto não encontrado", "error");
+        setSyncStatus("Projeto nÃ£o encontrado", "error");
         return;
       }
       const remoteData = snapshot.data().projectData;
       if (!Array.isArray(remoteData)) {
-        setSyncStatus("Dados do Firestore inválidos", "error");
+        setSyncStatus("Dados do Firestore invÃ¡lidos", "error");
         return;
       }
       const currentData = window.getProjectData();
@@ -179,6 +186,7 @@ window.stopFirestoreSync = function() {
 
 window.firebaseSignIn = (email, password) =>
   signInWithEmailAndPassword(auth, email, password);
+window.firebaseCanEdit = isEditor;
 window.firebaseSendPasswordResetEmail = email =>
   sendPasswordResetEmail(auth, email);
 window.firebaseSignOut = () => signOut(auth);
