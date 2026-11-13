@@ -2,6 +2,7 @@ import { initializeApp } from "firebase/app";
 import {
   getAuth,
   onAuthStateChanged,
+  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signOut,
 } from "firebase/auth";
@@ -178,6 +179,8 @@ window.stopFirestoreSync = function() {
 
 window.firebaseSignIn = (email, password) =>
   signInWithEmailAndPassword(auth, email, password);
+window.firebaseSendPasswordResetEmail = email =>
+  sendPasswordResetEmail(auth, email);
 window.firebaseSignOut = () => signOut(auth);
 
 onAuthStateChanged(auth, user => {
