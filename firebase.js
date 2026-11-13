@@ -15,7 +15,7 @@ import {
 } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDHsNLgCoWGXJj2NqOT2wiPzO6ofod_dA",
+  apiKey: "AIzaSyDHsNLgCoWGXjJ2nKqOT2wiPzO6ofod_dA",
   authDomain: "acompanhamento-obras-a9367.firebaseapp.com",
   projectId: "acompanhamento-obras-a9367",
   storageBucket: "acompanhamento-obras-a9367.firebasestorage.app",
