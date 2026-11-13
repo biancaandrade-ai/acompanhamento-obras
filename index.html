@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Secador de Torre 60 T/H</title>
-    <link rel="icon" type="image/jpeg" href="./logo.jpg">
+    <link rel="icon" type="image/png" href="./favicon.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -350,14 +350,14 @@
     <!-- Gerenciar Cronograma Modal -->
     <div id="schedule-modal" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl shadow-2xl p-6 w-full max-w-md hidden z-50 fade-in border border-slate-200">
         <div class="flex justify-between items-start mb-4"><h3 class="text-lg font-bold text-slate-900"><i class="fa-solid fa-file-invoice text-indigo-600 mr-2"></i> Gerenciar Cronograma</h3><button onclick="closeScheduleModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button></div>
-        <p class="text-sm text-slate-600 mb-4">Você pode exportar a lista atual, ou importar um novo arquivo <b>(.json, .pdf, .mpp, .xlsx)</b> se houverem mudanças no projeto.</p>
+        <p class="text-sm text-slate-600 mb-4">Importe um cronograma em <b>.xlsx, .csv, .txt ou .tsv</b> (exportação tabulada do MS Project) ou um arquivo <b>.json</b>.</p>
         <div class="flex flex-col gap-3">
             <button onclick="exportSchedule()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold rounded-lg px-4 py-3 transition-colors flex items-center justify-center gap-2 border border-slate-300"><i class="fa-solid fa-download text-indigo-600"></i> Baixar Cronograma Atual (.json)</button>
             <div class="relative w-full">
-                <input type="file" id="import-file" accept=".json, .pdf, .mpp, .mpx, .xml, .csv, .xlsx" class="hidden" onchange="importSchedule(event)">
+                <input type="file" id="import-file" accept=".json, .txt, .tsv, .csv, .xls, .xlsx" class="hidden" onchange="importSchedule(event)">
                 <button onclick="document.getElementById('import-file').click()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg px-4 py-3 transition-colors flex items-center justify-center gap-2 shadow-sm"><i class="fa-solid fa-upload"></i> Importar Novo Cronograma</button>
             </div>
-            <p class="text-[10px] text-slate-400 text-center mt-1">O sistema lerá automaticamente o documento selecionado.</p>
+            <p class="text-[10px] text-slate-400 text-center mt-1">Mantém a ordem das atividades e valida os dados antes de atualizar o painel.</p>
         </div>
     </div>
 
@@ -458,7 +458,7 @@
                     { id: "1.2.16", name: "1.2.16 Correia transp conv ct24 (descarga)", progress: 0, workers: 0, start: "2026-12-15", end: "2026-12-18", deps: ["1.2.13"] },
                     { id: "1.2.17", name: "1.2.17 Instalação do medidor de umidade", type: "Automação", progress: 0, workers: 0, start: "2027-02-10", end: "2027-02-15", deps: ["1.2.16"] },
                     { id: "1.2.18", name: "1.2.18 Montagem elétrica da CT - Descarga", type: "Elétrica", progress: 0, workers: 0, start: "2026-12-19", end: "2027-01-02", deps: ["1.2.16"] },
-                    { id: "1.2.19", name: "1.2.19 Testes dos Medidores da copagás", type: "Automação", progress: 0, workers: 0, start: "2026-11-03", end: "2026-11-04", deps: [] },
+                    { id: "1.2.19", name: "1.2.19 Testes dos Medidores da copagás", type: "Automação", progress: 100, workers: 0, start: "2026-11-03", end: "2026-11-04", deps: [] },
                     { id: "1.2.20", name: "1.2.20 Montagem da linha de Gás GLP", type: "Pneumática", progress: 0, workers: 0, start: "2026-10-27", end: "2026-12-11", deps: [] },
                     { id: "1.2.21", name: "1.2.21 Instalção do medidor Mássico", type: "Automação", progress: 0, workers: 0, start: "2026-12-12", end: "2026-12-17", deps: ["1.2.20"] },
                     { id: "1.2.22", name: "1.2.22 Start Up e Comissionamento do Secador", progress: 0, workers: 0, start: "2027-02-15", end: "2027-02-17", deps: ["1.2.17"] }
@@ -519,7 +519,7 @@
             {
                 id: "1.5", name: "1.5 MONTAGEM MECANICA DA PASSARELA 4 E CT 7", type: "Mecânica", weight: 6,
                 tasks: [
-                    { id: "1.5.1", name: "1.5.1 Separação dos Materiais", progress: 0, workers: 0, start: "2026-11-05", end: "2026-11-06", deps: [] },
+                    { id: "1.5.1", name: "1.5.1 Separação dos Materiais", progress: 70, workers: 0, start: "2026-11-05", end: "2026-11-06", deps: [] },
                     { id: "1.5.2", name: "1.5.2 Pré - montagem torres, passarela 4 e ct7", progress: 0, workers: 0, start: "2026-11-09", end: "2026-11-30", deps: ["1.5.1"] },
                     { id: "1.5.3", name: "1.5.3 Pass fech 4500 x 38000", progress: 0, workers: 0, start: "2026-12-01", end: "2026-12-07", deps: ["1.5.2"] },
                     { id: "1.5.4", name: "1.5.4 Torre 1000 x 2830 x 17m (A)", progress: 0, workers: 0, start: "2026-12-01", end: "2026-12-07", deps: ["1.5.2"] },
@@ -787,100 +787,259 @@
         }
 
         function parseExcelDate(dateVal) {
-            if (!dateVal) return null;
-            if (typeof dateVal === 'number') {
-                const date = new Date(Math.round((dateVal - 25569) * 86400 * 1000));
-                date.setMinutes(date.getMinutes() + date.getTimezoneOffset());
-                return date.toISOString().split('T')[0];
+            if (dateVal === null || dateVal === undefined || dateVal === '') return null;
+            if (dateVal instanceof Date && !Number.isNaN(dateVal.getTime())) {
+                return dateVal.toISOString().slice(0, 10);
             }
-            if (typeof dateVal === 'string') {
-                const match = dateVal.match(/(\d{2})\/(\d{2})\/(\d{2,4})/);
-                if (match) {
-                    let year = match[3];
-                    if (year.length === 2) year = "20" + year;
-                    return `${year}-${match[2]}-${match[1]}`;
+            if (typeof dateVal === 'number' && Number.isFinite(dateVal)) {
+                const date = new Date(Math.round((dateVal - 25569) * 86400000));
+                return Number.isNaN(date.getTime()) ? null : date.toISOString().slice(0, 10);
+            }
+            const value = String(dateVal).trim();
+            let match = value.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+            if (match) {
+                const year = Number(match[1]);
+                const month = Number(match[2]);
+                const day = Number(match[3]);
+                const date = new Date(Date.UTC(year, month - 1, day));
+                if (date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day) {
+                    return `${String(year).padStart(4, '0')}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 }
+                return null;
             }
-            return null;
+            match = value.match(/(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
+            if (!match) return null;
+            const day = Number(match[1]);
+            const month = Number(match[2]);
+            let year = Number(match[3]);
+            if (match[3].length === 2) year += 2000;
+            const date = new Date(Date.UTC(year, month - 1, day));
+            if (date.getUTCFullYear() !== year || date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day) return null;
+            return `${String(year).padStart(4, '0')}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        }
+
+        function normalizeScheduleHeader(value) {
+            return String(value || '')
+                .replace(/^\uFEFF/, '')
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .toLowerCase()
+                .replace(/[^a-z0-9%]+/g, ' ')
+                .trim();
+        }
+
+        function parseSchedulePercent(value) {
+            if (value === null || value === undefined || String(value).trim() === '') return null;
+            const normalized = String(value).replace('%', '').replace(/\s/g, '').replace(',', '.');
+            let percent = Number(normalized);
+            if (!Number.isFinite(percent)) throw new Error(`Percentual inválido: "${value}".`);
+            if (typeof value === 'number' && percent > 0 && percent <= 1) percent *= 100;
+            if (percent < 0 || percent > 100) throw new Error(`O percentual "${value}" deve estar entre 0% e 100%.`);
+            return Math.round(percent);
+        }
+
+        function getScheduleImportColumns(rows) {
+            const header = (rows[0] || []).map(normalizeScheduleHeader);
+            const findColumn = aliases => header.findIndex(value => aliases.includes(value));
+            const columns = {
+                id: findColumn(['id', 'id da tarefa', 'task id', 'unique id']),
+                name: findColumn(['nome da tarefa', 'nome', 'task name', 'name', 'atividade']),
+                start: findColumn(['inicio', 'data de inicio', 'data inicial', 'start', 'start date']),
+                finish: findColumn(['termino', 'fim', 'data de termino', 'data final', 'finish', 'finish date', 'end']),
+                progress: findColumn(['% concluida', '% fisica concluida', 'progresso', '% complete', 'percent complete', 'percentual concluido', 'percent complete']),
+                predecessors: findColumn(['predecessoras', 'predecessora', 'predecessors', 'predecessor']),
+                summary: findColumn(['resumo', 'summary', 'tarefa resumo'])
+            };
+
+            if (columns.name >= 0) {
+                const missing = ['start', 'finish', 'progress'].filter(key => columns[key] < 0);
+                if (missing.length) {
+                    throw new Error('A planilha precisa ter colunas para Nome da Tarefa, Início, Término e % concluída.');
+                }
+                return { ...columns, hasHeader: true };
+            }
+
+            const firstDataRow = rows.find(row => row.length >= 7 && /^\d+$/.test(String(row[0]).trim()) && String(row[2] || '').trim());
+            if (!firstDataRow || !parseExcelDate(firstDataRow[4]) || !parseExcelDate(firstDataRow[5])) {
+                throw new Error('Não reconheci os cabeçalhos nem o formato tabulado do MS Project. Use .xlsx com cabeçalhos ou exporte como texto delimitado por tabulações.');
+            }
+            return { id: 0, name: 2, start: 4, finish: 5, progress: 6, predecessors: 7, summary: -1, hasHeader: false };
+        }
+
+        function getScheduleNameTokens(value) {
+            const ignored = new Set(['a', 'as', 'ao', 'aos', 'com', 'da', 'das', 'de', 'do', 'dos', 'e', 'em', 'na', 'nas', 'no', 'nos', 'o', 'os', 'para', 'por', 'sem']);
+            return String(value || '')
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .toLowerCase()
+                .replace(/^\s*\d+(?:\.\d+)*\s*/, '')
+                .replace(/\bproj(?:eto)?\s*\d+\b/g, ' ')
+                .replace(/\belevador\b/g, 'elev')
+                .replace(/(\d+)[.,]0+(?=[a-z])/g, '$1')
+                .replace(/[^a-z0-9]+/g, ' ')
+                .split(/\s+/)
+                .filter(token => token && !ignored.has(token));
+        }
+
+        function scheduleNamesMatch(sourceName, dashboardName) {
+            const sourceTokens = new Set(getScheduleNameTokens(sourceName));
+            const dashboardTokens = new Set(getScheduleNameTokens(dashboardName));
+            if (!sourceTokens.size || !dashboardTokens.size) return false;
+            const shared = [...sourceTokens].filter(token => dashboardTokens.has(token)).length;
+            return shared / Math.min(sourceTokens.size, dashboardTokens.size) >= 0.25;
+        }
+
+        function prepareScheduleImport(rows, currentData) {
+            const columns = getScheduleImportColumns(rows);
+            const activities = rows.slice(columns.hasHeader ? 1 : 0).filter(row => row.some(cell => String(cell || '').trim()));
+            const importedTasks = activities.filter(row => {
+                const name = String(row[columns.name] || '').trim();
+                if (!name) return false;
+                if (columns.summary >= 0) {
+                    const summaryValue = normalizeScheduleHeader(row[columns.summary]);
+                    return !['1', 'true', 'yes', 'sim'].includes(summaryValue);
+                }
+                const isUppercase = name === name.toLocaleUpperCase('pt-BR') && /[A-ZÀ-Ú]/.test(name);
+                const hasPredecessor = columns.predecessors >= 0 && String(row[columns.predecessors] || '').trim() !== '';
+                return !(isUppercase && !hasPredecessor);
+            });
+            const targets = currentData.flatMap((group, groupIndex) =>
+                group.tasks.map((task, taskIndex) => ({ groupIndex, taskIndex, task, group }))
+            );
+            if (importedTasks.length !== targets.length) {
+                throw new Error(`O arquivo contém ${importedTasks.length} atividades detalhadas, mas o painel tem ${targets.length}. Nenhum dado foi alterado. Confira se o arquivo mantém as mesmas atividades e a ordem do cronograma.`);
+            }
+
+            const updatedData = JSON.parse(JSON.stringify(currentData));
+            importedTasks.forEach((row, index) => {
+                const sourceName = String(row[columns.name] || '').trim();
+                const target = targets[index];
+                if (!scheduleNamesMatch(sourceName, target.task.name)) {
+                    throw new Error(`Não foi possível associar com segurança a atividade "${sourceName}" à atividade "${target.task.name}". Nenhum dado foi alterado.`);
+                }
+                const start = parseExcelDate(row[columns.start]);
+                const finish = parseExcelDate(row[columns.finish]);
+                const progress = parseSchedulePercent(row[columns.progress]);
+                if (!start || !finish || progress === null) {
+                    throw new Error(`A atividade "${sourceName}" precisa ter início, término e percentual concluído válidos.`);
+                }
+                if (finish < start) throw new Error(`O término da atividade "${sourceName}" é anterior ao início.`);
+
+                const task = updatedData[target.groupIndex].tasks[target.taskIndex];
+                task.start = start;
+                task.end = finish;
+                if (target.group.type === 'Logística') {
+                    task.arrival = finish;
+                    task.arrivalProgress = progress;
+                } else {
+                    task.progress = progress;
+                }
+            });
+            return { projectData: updatedData, updatedCount: importedTasks.length, summaryCount: activities.length - importedTasks.length };
+        }
+
+        function parseTabDelimitedSchedule(text) {
+            const rows = String(text || '').replace(/^\uFEFF/, '').split(/\r\n|\n|\r/)
+                .filter(line => line.trim())
+                .map(line => line.split('\t').map(cell => cell.trim()));
+            if (!rows.length || !rows.some(row => row.length > 1)) {
+                throw new Error('O arquivo de texto não contém colunas separadas por tabulações.');
+            }
+            return rows;
+        }
+
+        function decodeScheduleText(buffer) {
+            const bytes = new Uint8Array(buffer);
+            if (bytes.length >= 2 && bytes[0] === 0xff && bytes[1] === 0xfe) {
+                return new TextDecoder('utf-16le').decode(bytes.subarray(2));
+            }
+            if (bytes.length >= 2 && bytes[0] === 0xfe && bytes[1] === 0xff) {
+                return new TextDecoder('utf-16be').decode(bytes.subarray(2));
+            }
+            if (bytes.length > 1 && bytes[1] === 0) {
+                return new TextDecoder('utf-16le').decode(bytes);
+            }
+            return new TextDecoder('utf-8').decode(bytes);
         }
 
         window.importSchedule = function(event) {
             const file = event.target.files[0];
             if (!file) return;
             const ext = file.name.split('.').pop().toLowerCase();
+            const reader = new FileReader();
+            const applyRows = rows => {
+                try {
+                    const result = prepareScheduleImport(rows, projectData);
+                    projectData = result.projectData;
+                    saveToLocal();
+                    renderTasks();
+                    closeScheduleModal();
+                    Swal.fire('Cronograma atualizado!', `${result.updatedCount} atividades atualizadas; ${result.summaryCount} linhas de resumo ignoradas.`, 'success');
+                } catch (error) {
+                    console.error('Falha ao importar cronograma:', error);
+                    Swal.fire('Importação não aplicada', error.message || 'Não foi possível validar o cronograma.', 'error');
+                }
+            };
 
             if (ext === 'json') {
-                const reader = new FileReader();
                 reader.onload = function(e) {
                     try {
                         const importedData = JSON.parse(e.target.result);
-                        if (Array.isArray(importedData)) {
-                            projectData = importedData;
-                            saveToLocal(); 
-                            renderTasks();
-                            closeScheduleModal();
-                            Swal.fire('Importado!', 'O cronograma foi atualizado com as novas atividades e datas.', 'success');
-                        } else throw new Error("Formato inválido");
-                    } catch (error) { Swal.fire('Erro', 'O arquivo importado não é um cronograma JSON válido.', 'error'); }
+                        if (!Array.isArray(importedData) || !importedData.every(group => Array.isArray(group.tasks))) {
+                            throw new Error('O arquivo JSON não tem a estrutura de cronograma esperada.');
+                        }
+                        projectData = importedData;
+                        saveToLocal();
+                        renderTasks();
+                        closeScheduleModal();
+                        Swal.fire('Importado!', 'O cronograma JSON foi atualizado.', 'success');
+                    } catch (error) {
+                        console.error('Falha ao importar cronograma JSON:', error);
+                        Swal.fire('Erro', error.message || 'O arquivo importado não é um cronograma JSON válido.', 'error');
+                    }
                 };
                 reader.readAsText(file);
-            } else if (ext === 'xlsx' || ext === 'xls' || ext === 'csv') {
-                Swal.fire({ title: 'Lendo Planilha...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
-                const reader = new FileReader();
+            } else if (['xlsx', 'xls', 'csv'].includes(ext)) {
+                if (!window.XLSX) {
+                    Swal.fire('Erro', 'A biblioteca de planilhas não carregou. Atualize a página e tente novamente.', 'error');
+                    event.target.value = '';
+                    return;
+                }
+                Swal.fire({ title: 'Lendo planilha...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
                 reader.onload = function(e) {
                     try {
-                        const data = new Uint8Array(e.target.result);
-                        const workbook = XLSX.read(data, {type: 'array'});
+                        const workbook = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
                         const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                        const jsonRows = XLSX.utils.sheet_to_json(worksheet);
-
-                        let updatedCount = 0;
-                        jsonRows.forEach(row => {
-                            let taskName = row['Nome da Tarefa'] || row['Nome'] || row['Name'] || row['Task Name'] || row['Atividade'];
-                            let start = row['Início'] || row['Inicio'] || row['Start'];
-                            let end = row['Término'] || row['Termino'] || row['Finish'] || row['Fim'];
-                            let prog = row['% concluída'] || row['% física concluída'] || row['Progresso'] || row['% Complete'];
-
-                            if(taskName) {
-                                projectData.forEach(g => {
-                                    g.tasks.forEach(t => {
-                                        if (t.name.toLowerCase().includes(taskName.toLowerCase()) || taskName.toLowerCase().includes(t.id)) {
-                                            if(start) { let ps = parseExcelDate(start); if(ps) t.start = ps; }
-                                            if(end) { let pe = parseExcelDate(end); if(pe) { if(g.type === 'Logística') t.arrival = pe; else t.end = pe; } }
-                                            if(prog !== undefined) {
-                                                let p = parseInt(prog);
-                                                if(!isNaN(p)) { if(g.type === 'Logística') t.arrivalProgress = p; else t.progress = p; }
-                                            }
-                                            updatedCount++;
-                                        }
-                                    });
-                                });
-                            }
-                        });
-
-                        if(updatedCount > 0) {
-                            saveToLocal();
-                            renderTasks();
-                            closeScheduleModal();
-                            Swal.fire('Importado com Sucesso!', `O sistema cruzou os dados e atualizou ${updatedCount} atividades a partir da planilha.`, 'success');
-                        } else {
-                            Swal.fire('Atenção', 'Planilha lida, mas nenhuma tarefa correspondente encontrada. Verifique se a coluna se chama "Nome da Tarefa".', 'warning');
-                        }
+                        const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: false, defval: '', blankrows: false });
+                        applyRows(rows);
                     } catch (error) {
-                        console.error(error);
-                        Swal.fire('Erro', 'Falha ao processar o arquivo Excel.', 'error');
+                        console.error('Falha ao ler planilha:', error);
+                        Swal.fire('Erro', error.message || 'Falha ao processar a planilha.', 'error');
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            } else if (ext === 'txt' || ext === 'tsv') {
+                Swal.fire({ title: 'Lendo cronograma...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+                reader.onload = function(e) {
+                    try {
+                        applyRows(parseTabDelimitedSchedule(decodeScheduleText(e.target.result)));
+                    } catch (error) {
+                        console.error('Falha ao ler cronograma tabulado:', error);
+                        Swal.fire('Erro', error.message || 'Falha ao processar o arquivo tabulado.', 'error');
                     }
                 };
                 reader.readAsArrayBuffer(file);
             } else {
-                closeScheduleModal();
                 Swal.fire({
                     icon: 'info',
-                    title: 'Formato Visual Não Suportado',
-                    html: `O navegador não consegue extrair dados de <b>${file.name}</b> de forma estruturada.<br><br><b>Como atualizar:</b><br>No MS Project, salve o arquivo como <b>Excel (.xlsx)</b> e importe aqui para atualização automática.`
+                    title: 'Formato não suportado',
+                    text: 'Use .xlsx, .csv, .txt ou .tsv (delimitado por tabulações).'
                 });
             }
-            event.target.value = "";
+            reader.onerror = function() {
+                Swal.fire('Erro', 'Não foi possível ler o arquivo selecionado.', 'error');
+            };
+            event.target.value = '';
         }
 
         // --- SISTEMA DE FOTOS RAPIDO ---
